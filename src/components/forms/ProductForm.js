@@ -1,31 +1,59 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Image, X } from 'lucide-react';
+import { useProducts } from '@/hooks/useProducts';
 
-export function ProductForm({ isOpen, onClose }) {
+export function ProductForm({ isOpen, onClose, product = null }) {
+  const { createProduct, updateProduct } = useProducts();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    price: '',
-    category: '',
-    stock: '',
+    posology: '',
     image: null
   });
 
-  const categories = [
-    'Soins du visage',
-    'Soins du corps',
-    'Anti-âge',
-    'Nettoyants',
-    'Hydratants',
-    'Traitements spécifiques'
-  ];
 
-  const handleSubmit = (e) => {
+
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        name: product.name || '',
+        description: product.description || '',
+        posology: product.posology || '',
+        image: null
+      });
+    } else {
+      setFormData({
+        name: '',
+        description: '',
+        posology: '',
+        image: null
+      });
+    }
+  }, [product]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logique de soumission à implémenter
-    onClose();
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('posology', formData.posology);
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+
+      if (product) {
+        await updateProduct(product.id, formDataToSend);
+      } else {
+        await createProduct(formDataToSend);
+      }
+      onClose();
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert('Une erreur est survenue lors de la sauvegarde du produit.');
+    }
   };
 
   if (!isOpen) return null;
@@ -40,7 +68,9 @@ export function ProductForm({ isOpen, onClose }) {
           >
             <X className="w-6 h-6" />
           </button>
-          <h2 className="text-2xl font-semibold pr-8">Nouveau produit</h2>
+          <h2 className="text-2xl font-semibold pr-8">
+            {product ? `Modifier ${product.name}` : 'Nouveau produit'}
+          </h2>
         </div>
 
         <div className="p-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
@@ -72,56 +102,17 @@ export function ProductForm({ isOpen, onClose }) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Prix (€)
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="input"
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Stock
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  className="input"
-                  placeholder="Quantité en stock"
-                />
-              </div>
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Catégorie
+                Posologie
               </label>
-              <select
+              <textarea
                 required
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="input"
-              >
-                <option value="">Sélectionnez une catégorie</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
+                value={formData.posology}
+                onChange={(e) => setFormData({ ...formData, posology: e.target.value })}
+                className="input min-h-[100px]"
+                placeholder="Posologie du produit..."
+              />
             </div>
 
             <div>
@@ -168,7 +159,7 @@ export function ProductForm({ isOpen, onClose }) {
               form="productForm"
               className="btn-primary"
             >
-              Créer
+              {product ? 'Enregistrer les modifications' : 'Créer le produit'}
             </button>
           </div>
         </div>

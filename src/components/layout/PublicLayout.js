@@ -29,12 +29,12 @@ export function PublicLayout({ children }) {
 
   const isActive = (path) => pathname === path;
 
-  const navLinks = [
-    { href: '/treatments', label: 'Traitements' },
-    { href: '/diagnosis', label: 'Diagnostic' },
-    { href: '/results', label: 'Résultats' },
-    { href: '/testimonials', label: 'Témoignages' }
-  ];
+  // const navLinks = [
+  //   { href: '/treatments', label: 'Traitements' },
+  //   { href: '/diagnosis', label: 'Diagnostic' },
+  //   { href: '/results', label: 'Résultats' },
+  //   { href: '/testimonials', label: 'Témoignages' }
+  // ];
 
   return (
     <div className="min-h-screen bg-background hero-pattern">
@@ -47,7 +47,7 @@ export function PublicLayout({ children }) {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8 text-sm font-medium">
+            {/* <div className="hidden md:flex items-center gap-8 text-sm font-medium">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -57,7 +57,7 @@ export function PublicLayout({ children }) {
                   {link.label}
                 </Link>
               ))}
-            </div>
+            </div> */}
 
             <div className="hidden md:flex items-center gap-4">
               <Link
@@ -94,7 +94,7 @@ export function PublicLayout({ children }) {
         {isMobileMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-b border-gray-200">
-              {navLinks.map((link) => (
+              {/* {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -107,7 +107,7 @@ export function PublicLayout({ children }) {
                 >
                   {link.label}
                 </Link>
-              ))}
+              ))} */}
               <div className="pt-4 pb-3 border-t border-gray-200">
                 <div className="space-y-2">
                   <Link

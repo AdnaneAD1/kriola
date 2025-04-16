@@ -4,12 +4,31 @@ import { useState } from 'react';
 import { Plus, Package } from 'lucide-react';
 import { ProductForm } from '../../../components/forms/ProductForm';
 import { DropdownMenu } from '../../../components/ui/DropdownMenu';
+import { useProducts } from '@/hooks/useProducts';
 
 export default function AdminProducts() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  const products = [
+  const { products, error, deleteProduct, isLoading } = useProducts();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500">Chargement des produits...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-500">Une erreur est survenue lors du chargement des produits.</div>
+      </div>
+    );
+  }
+
+  const mockProducts = [
     {
       id: 1,
       name: 'Crème Hydratante Premium',
@@ -33,9 +52,15 @@ export default function AdminProducts() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (productId) => {
-    // Logique de suppression à implémenter
-    console.log('Suppression du produit:', productId);
+  const handleDelete = async (productId) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+      try {
+        await deleteProduct(productId);
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+        alert('Une erreur est survenue lors de la suppression du produit.');
+      }
+    }
   };
 
   const formatPrice = (price) => {
@@ -62,7 +87,7 @@ export default function AdminProducts() {
       </div>
 
       <div className="grid gap-6">
-        {products.map((product) => (
+        {(products || []).map((product) => (
           <div key={product.id} className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
@@ -71,7 +96,7 @@ export default function AdminProducts() {
                 </div>
                 <div>
                   <h3 className="font-medium">{product.name}</h3>
-                  <p className="text-sm text-gray-500">{product.category}</p>
+                  <p className="text-sm text-gray-500">{product.status ? 'Actif' : 'Inactif'}</p>
                 </div>
               </div>
               <DropdownMenu
@@ -94,23 +119,9 @@ export default function AdminProducts() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Prix:</span>
-                  <span className="ml-2 text-lg font-semibold text-primary">
-                    {formatPrice(product.price)}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Stock:</span>
-                  <span className={`
-                    ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                    ${product.stock > 10 
-                      ? 'bg-green-100 text-green-800' 
-                      : product.stock > 0 
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }
-                  `}>
-                    {product.stock} unités
+                  <span className="text-sm font-medium text-gray-700">Posologie:</span>
+                  <span className="ml-2 text-gray-600">
+                    {product.posology}
                   </span>
                 </div>
               </div>

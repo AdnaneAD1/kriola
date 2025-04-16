@@ -26,7 +26,7 @@ export default function Auth() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="bg-white px-2 text-gray-500">
-                  {mode === 'login' ? 'Nouveau sur PlasmaCare ?' : 'Déjà inscrit ?'}
+                  {mode === 'login' ? 'Nouveau sur KriolaCare ?' : 'Déjà inscrit ?'}
                 </span>
               </div>
             </div>

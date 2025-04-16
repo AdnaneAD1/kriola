@@ -4,39 +4,49 @@ import { useState } from 'react';
 import { Plus, User } from 'lucide-react';
 import { DiagnosisForm } from '../../../components/forms/DiagnosisForm';
 import { DropdownMenu } from '../../../components/ui/DropdownMenu';
+import { useDiagnosis } from '../../../hooks/useDiagnosis';
 
 export default function Diagnosis() {
+  const { diagnoses, isLoading, error, createDiagnosis, updateDiagnosis, deleteDiagnosis } = useDiagnosis();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingDiagnosis, setEditingDiagnosis] = useState(null);
 
-  const diagnoses = [
-    {
-      id: 1,
-      date: '2024-04-15',
-      patient: 'Marie Dupont',
-      skinType: 'Mixte',
-      concerns: ['Acné', 'Taches brunes'],
-      recommendations: 'Traitement LED + Soin hydratant'
-    },
-    {
-      id: 2,
-      date: '2024-04-16',
-      patient: 'Jean Martin',
-      skinType: 'Grasse',
-      concerns: ['Points noirs', 'Pores dilatés'],
-      recommendations: 'Peeling + Soin matifiant'
+  const handleSubmit = async (data) => {
+    try {
+      if (editingDiagnosis) {
+        await updateDiagnosis(editingDiagnosis.id, data);
+      } else {
+        await createDiagnosis(data);
+      }
+      setIsFormOpen(false);
+      setEditingDiagnosis(null);
+    } catch (error) {
+      console.error('Erreur:', error);
     }
-  ];
+  };
 
   const handleEdit = (diagnosis) => {
     setEditingDiagnosis(diagnosis);
     setIsFormOpen(true);
   };
 
-  const handleDelete = (diagnosisId) => {
-    // Logique de suppression à implémenter
-    console.log('Suppression du diagnostic:', diagnosisId);
+  const handleDelete = async (diagnosisId) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce diagnostic ?')) {
+      try {
+        await deleteDiagnosis(diagnosisId);
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+      }
+    }
   };
+
+  // if (isLoading) {
+  //   return <div>Chargement...</div>;
+  // }
+
+  // if (error) {
+  //   return <div className="text-red-500">{error}</div>;
+  // }
 
   return (
     <div>
@@ -63,7 +73,7 @@ export default function Diagnosis() {
                   <User className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium">{diagnosis.patient}</h3>
+                  <h3 className="font-medium">{diagnosis.user_name}</h3>
                   <p className="text-sm text-gray-500">{new Date(diagnosis.date).toLocaleDateString('fr-FR')}</p>
                 </div>
               </div>
@@ -85,7 +95,7 @@ export default function Diagnosis() {
             <div className="grid gap-4">
               <div>
                 <h4 className="text-sm font-medium text-gray-700">Type de peau</h4>
-                <p className="mt-1">{diagnosis.skinType}</p>
+                <p className="mt-1">{diagnosis.skin_type}</p>
               </div>
 
               <div>
@@ -102,10 +112,51 @@ export default function Diagnosis() {
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-sm font-medium text-gray-700">Recommandations</h4>
-                <p className="mt-1 text-gray-600">{diagnosis.recommendations}</p>
-              </div>
+              {diagnosis.treatments && diagnosis.treatments.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700">Traitements recommandés</h4>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {diagnosis.treatments.map((treatment, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        {treatment}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {diagnosis.recommendations && (
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700">Recommandations</h4>
+                  <p className="mt-1 text-gray-600">{diagnosis.recommendations}</p>
+                </div>
+              )}
+
+              {diagnosis.notes && (
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700">Notes</h4>
+                  <p className="mt-1 text-gray-600">{diagnosis.notes}</p>
+                </div>
+              )}
+
+              {diagnosis.photos && diagnosis.photos.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700">Photos</h4>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {diagnosis.photos.map((photo, index) => (
+                      <img
+                        key={index}
+                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${photo}`}
+                        alt={`Photo ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -117,6 +168,7 @@ export default function Diagnosis() {
           setIsFormOpen(false);
           setEditingDiagnosis(null);
         }}
+        onSubmit={handleSubmit}
         diagnosis={editingDiagnosis}
       />
     </div>

@@ -1,23 +1,63 @@
 'use client'
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Mail, Lock, LogIn } from 'lucide-react';
-import { Logo } from '../../../components/ui/Logo';
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { Mail, Lock } from 'lucide-react'
+import { Logo } from '../../../components/ui/Logo'
+import { useAuth } from '@/hooks/auth'
+import AuthSessionStatus from '@/app/(auth)/AuthSessionStatus'
+import { LoadingButton } from '@/components/ui/LoadingButton'
+import { useRouter } from 'next/navigation'
 
 export default function Login() {
+  const router = useRouter()
+  const { login, googleLogin, user } = useAuth({
+    middleware: 'guest',
+  })
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    remember: false
-  });
+  })
+
+  const [errors, setErrors] = useState([])
+  const [status, setStatus] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'admin') {
+        router.push('/admin')
+      } else {
+        router.push('/dashboard')
+      }
+    }
+  }, [user, router])
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Simulation de connexion
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    window.location.href = '/dashboard';
-  };
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      await login({
+        email: formData.email,
+        password: formData.password,
+        setErrors,
+        setStatus,
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true)
+    try {
+      await googleLogin()
+    } finally {
+      setIsGoogleLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -27,19 +67,22 @@ export default function Login() {
             <Logo />
           </Link>
         </div>
+
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Connexion
+          Connexion à votre compte
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Ou{' '}
-          <Link href="/register" className="font-medium text-primary hover:text-primary/80">
-            créez un compte gratuitement
+          <Link href="/register" className="text-primary hover:text-primary/80">
+            créer un nouveau compte
           </Link>
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
+          <AuthSessionStatus className="mb-4" status={status} />
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -56,9 +99,11 @@ export default function Login() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="input pl-10 w-full"
-                  placeholder="vous@exemple.com"
                 />
               </div>
+              {errors.email && (
+                <div className="mt-1 text-sm text-red-600">{errors.email[0]}</div>
+              )}
             </div>
 
             <div>
@@ -76,83 +121,56 @@ export default function Login() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="input pl-10 w-full"
-                  placeholder="••••••••"
                 />
               </div>
+              {errors.password && (
+                <div className="mt-1 text-sm text-red-600">{errors.password[0]}</div>
+              )}
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember"
-                  name="remember"
-                  type="checkbox"
-                  checked={formData.remember}
-                  onChange={(e) => setFormData({ ...formData, remember: e.target.checked })}
-                  className="h-4 w-4 text-primary focus:ring-primary/20 border-gray-300 rounded"
-                />
-                <label htmlFor="remember" className="ml-2 block text-sm text-gray-900">
-                  Se souvenir de moi
-                </label>
-              </div>
-
               <div className="text-sm">
-                <Link href="/forgot-password" className="font-medium text-primary hover:text-primary/80">
+                <Link href="/forgot-password" className="text-primary hover:text-primary/80">
                   Mot de passe oublié ?
                 </Link>
               </div>
             </div>
 
             <div>
-              <button
-                type="submit"
-                className="btn-primary w-full flex justify-center items-center"
-              >
-                <LogIn className="w-5 h-5 mr-2" />
+              <LoadingButton type="submit" className="w-full" isLoading={isLoading}>
                 Se connecter
-              </button>
+              </LoadingButton>
+            </div>
+
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">Ou continuer avec</span>
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-1 gap-3">
+                <LoadingButton
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  className="btn-outline w-full flex justify-center items-center text-white"
+                  isLoading={isGoogleLoading}
+                >
+                  <img
+                    className="h-5 w-5 mr-2"
+                    src="https://www.svgrepo.com/show/475656/google-color.svg"
+                    alt="Google"
+                  />
+                  Google
+                </LoadingButton>
+              </div>
             </div>
           </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Ou continuez avec
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                className="btn-outline w-full flex justify-center items-center"
-              >
-                <img
-                  className="h-5 w-5 mr-2"
-                  src="https://www.svgrepo.com/show/475656/google-color.svg"
-                  alt="Google"
-                />
-                Google
-              </button>
-              <button
-                type="button"
-                className="btn-outline w-full flex justify-center items-center"
-              >
-                <img
-                  className="h-5 w-5 mr-2"
-                  src="https://www.svgrepo.com/show/448234/facebook.svg"
-                  alt="Facebook"
-                />
-                Facebook
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

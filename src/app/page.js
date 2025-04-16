@@ -2,6 +2,7 @@
 
 import { Sparkles, Leaf, Shield, Clock, Star, ArrowRight, Play, ChevronRight, Award, Users, Zap } from 'lucide-react';
 import { PublicLayout } from '../components/layout/PublicLayout';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -19,12 +20,11 @@ export default function Home() {
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-8 hover:bg-primary/20 transition-all cursor-pointer group animate-fade-in">
               <Sparkles className="w-4 h-4 animate-pulse" />
               <span className="text-sm font-medium">Découvrez la révolution des soins de la peau</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
               Transformez Votre Peau avec
-              <span className="gradient-text block mt-2">PlasmaCare</span>
+              <span className="gradient-text block mt-2">KriolaCare</span>
             </h1>
             
             <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8 animate-fade-in delay-100">
@@ -33,14 +33,10 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16 animate-fade-in delay-200">
-              <button className="btn-primary group">
+              <Link href="/dashboard" className="btn-primary group">
                 Réserver une Consultation
                 <ArrowRight className="inline-block ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button className="btn-outline group">
-                Regarder la vidéo
-                <Play className="inline-block ml-2 w-4 h-4 group-hover:scale-110 transition-transform" />
-              </button>
+              </Link>
             </div>
 
             {/* Hero Image Section */}
@@ -66,7 +62,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent z-10"></div>
                 <img 
                   src="https://studiokanea.fr/wp-content/uploads/2024/10/DALL%C2%B7E-2024-10-25-09.50.52-An-extreme-close-up-of-a-beauty-salon-facial-treatment-using-Russian-cold-plasma-therapy-on-a-client.-The-camera-angle-is-at-a-45-degree-angle-from-th-copie.jpg"
-                  alt="Traitement PlasmaCare"
+                  alt="Traitement KriolaCare"
                   className="w-full transform hover:scale-105 transition-transform duration-700"
                 />
               </div>

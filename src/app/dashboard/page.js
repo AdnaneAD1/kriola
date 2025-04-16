@@ -1,53 +1,47 @@
 'use client'
 
-import { Calendar, Clock, FileText, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, FileText, TrendingUp, Package } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { Alert } from '../../components/ui/Alert';
 import Link from 'next/link';
+import { useDashboard } from '../../hooks/useDashboard';
+import { useEffect, useState } from 'react';
 
 export default function Dashboard() {
   const searchParams = useSearchParams();
   const success = searchParams.get('success');
+  const { getStats, getSummary, isLoading, error } = useDashboard();
 
-  // Mock data pour simuler les données de l'API
-  const stats = {
-    upcomingAppointments: 3,
-    totalTreatmentTime: 180,
-    completedDiagnoses: 2,
-    treatmentProgress: 45
-  };
+  const [stats, setStats] = useState({
+    upcomingAppointments: 0,
+    totalTreatmentTime: 0,
+    completedDiagnoses: 0,
+    treatmentProgress: 0
+  });
 
-  const appointments = [
-    {
-      id: 1,
-      title: "Traitement Anti-âge",
-      date: "15 Avril 2025",
-      time: "14:30",
-      status: "confirmed",
-      category: "alopecie"
-    },
-    {
-      id: 2,
-      title: "Lifting Non-chirurgical",
-      date: "22 Avril 2025",
-      time: "10:00",
-      status: "pending",
-      category: "blepharochalasis"
-    }
-  ];
+  const [appointments, setAppointments] = useState([]);
+  const [diagnoses, setDiagnoses] = useState([]);
+  const [programs, setPrograms] = useState([]);
 
-  const diagnoses = [
-    {
-      date: "6 Avril 2025",
-      type: "Type de peau : Mixte",
-      result: "2 préoccupation(s) identifiée(s)"
-    },
-    {
-      date: "1 Avril 2025",
-      type: "Type de peau : Sèche",
-      result: "3 préoccupation(s) identifiée(s)"
-    }
-  ];
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        const [statsData, summaryData] = await Promise.all([
+          getStats(),
+          getSummary()
+        ]);
+        
+        setStats(statsData);
+        setAppointments(summaryData.appointments);
+        setDiagnoses(summaryData.diagnoses);
+        setPrograms(summaryData.programs);
+      } catch (err) {
+        console.error('Erreur lors du chargement des données:', err);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
 
   // Fonction pour traduire le statut en français
   const translateStatus = (status) => {
@@ -58,6 +52,8 @@ export default function Dashboard() {
         return 'En attente';
       case 'cancelled':
         return 'Annulé';
+      case 'completed':
+        return 'Terminé';
       default:
         return status;
     }
@@ -87,6 +83,12 @@ export default function Dashboard() {
       {success && (
         <Alert type="success">
           Votre diagnostic a été envoyé avec succès ! Nous vous contacterons bientôt avec nos recommandations.
+        </Alert>
+      )}
+
+      {error && (
+        <Alert type="error">
+          {error}
         </Alert>
       )}
 
@@ -137,6 +139,47 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Programs Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Mes programmes</h2>
+            <Link href="/dashboard/programs" className="text-primary hover:text-primary/80">
+              Voir tout
+            </Link>
+          </div>
+        </div>
+        <div className="divide-y divide-gray-100">
+          {programs?.map((program) => (
+            <div key={program.id} className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0">
+                    <Package className="w-6 h-6 text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{program.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {program.treatments_count} traitement{program.treatments_count > 1 ? 's' : ''}
+                    </p>
+                  </div>
+                </div>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  program.status === 'en cours' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {program.status}
+                </span>
+              </div>
+            </div>
+          ))}
+          {programs?.length === 0 && (
+            <div className="p-6 text-center text-gray-500">
+              Aucun programme actif
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Appointments Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100">
@@ -148,37 +191,45 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="divide-y divide-gray-100">
-          {appointments.map((appointment) => (
-            <div key={appointment.id} className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0">
-                    <Calendar className="w-6 h-6 text-gray-400" />
+          {appointments.length === 0 ? (
+            <div className="p-6 text-center text-gray-500">
+              Aucun rendez-vous prévu
+            </div>
+          ) : (
+            appointments.map((appointment) => (
+              <div key={appointment.id} className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0">
+                      <Calendar className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{appointment.title}</p>
+                      <p className="text-sm text-gray-500">
+                        {appointment.date} à {appointment.time}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">{appointment.title}</p>
-                    <p className="text-sm text-gray-500">
-                      {appointment.date} à {appointment.time}
-                    </p>
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm text-gray-500">
+                      {translateCategory(appointment.category)}
+                    </span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      appointment.status === 'confirmed' 
+                        ? 'bg-green-100 text-green-800'
+                        : appointment.status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : appointment.status === 'completed'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {translateStatus(appointment.status)}
+                    </span>
                   </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-500">
-                    {translateCategory(appointment.category)}
-                  </span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    appointment.status === 'confirmed' 
-                      ? 'bg-green-100 text-green-800'
-                      : appointment.status === 'pending'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {translateStatus(appointment.status)}
-                  </span>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -193,26 +244,32 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="divide-y divide-gray-100">
-          {diagnoses.map((diagnosis, index) => (
-            <div key={index} className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0">
-                    <FileText className="w-6 h-6 text-gray-400" />
+          {diagnoses.length === 0 ? (
+            <div className="p-6 text-center text-gray-500">
+              Aucun diagnostic disponible
+            </div>
+          ) : (
+            diagnoses.map((diagnosis) => (
+              <div key={diagnosis.id} className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0">
+                      <FileText className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{diagnosis.type}</p>
+                      <p className="text-sm text-gray-500">{diagnosis.date}</p>
+                    </div>
                   </div>
                   <div>
-                    <p className="font-medium">{diagnosis.type}</p>
-                    <p className="text-sm text-gray-500">{diagnosis.date}</p>
+                    <span className="text-sm text-gray-500">
+                      {diagnosis.result}
+                    </span>
                   </div>
                 </div>
-                <div>
-                  <span className="text-sm text-gray-500">
-                    {diagnosis.result}
-                  </span>
-                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

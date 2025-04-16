@@ -1,41 +1,15 @@
 'use client'
 
+import { Search, Filter, MoreVertical, Mail, Phone, User } from 'lucide-react';
+import Link from 'next/link';
+import { useUsers } from '@/hooks/useUsers';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { useState } from 'react';
-import { Search, Filter, MoreVertical, Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Users() {
-  const [users] = useState([
-    {
-      id: 1,
-      name: 'Marie Dupont',
-      email: 'marie.dupont@example.com',
-      phone: '06 12 34 56 78',
-      location: 'Paris, France',
-      status: 'active',
-      lastVisit: '15 Avril 2025',
-      treatments: ['Anti-âge', 'Lifting']
-    },
-    {
-      id: 2,
-      name: 'Sophie Martin',
-      email: 'sophie.martin@example.com',
-      phone: '06 23 45 67 89',
-      location: 'Lyon, France',
-      status: 'inactive',
-      lastVisit: '10 Avril 2025',
-      treatments: ['Éclaircissant']
-    },
-    {
-      id: 3,
-      name: 'Julie Lambert',
-      email: 'julie.lambert@example.com',
-      phone: '06 34 56 78 90',
-      location: 'Marseille, France',
-      status: 'active',
-      lastVisit: '12 Avril 2025',
-      treatments: ['Anti-âge']
-    }
-  ]);
+  const { users, loading } = useUsers();
+  const [activeMenu, setActiveMenu] = useState(null);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -59,18 +33,18 @@ export default function Users() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-2xl font-bold">Utilisateurs</h1>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <button className="btn-primary">
-            Ajouter un utilisateur
-          </button>
-          <button className="btn-secondary">
-            Exporter
-          </button>
-        </div>
       </div>
 
       {/* Filters */}
@@ -106,21 +80,19 @@ export default function Users() {
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left py-4 px-6 text-sm font-medium text-gray-600">Nom</th>
                 <th className="text-left py-4 px-6 text-sm font-medium text-gray-600">Contact</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-600">Localisation</th>
                 <th className="text-left py-4 px-6 text-sm font-medium text-gray-600">Statut</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-600">Dernière visite</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-600">Traitements</th>
+                <th className="text-left py-4 px-6 text-sm font-medium text-gray-600">Date d'inscription</th>
                 <th className="py-4 px-6"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {users.map((user) => (
+              {users?.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
                         <span className="text-primary font-medium">
-                          {user.name.split(' ').map(n => n[0]).join('')}
+                          {user.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div>
@@ -133,18 +105,14 @@ export default function Users() {
                     <div className="space-y-1">
                       <div className="flex items-center text-sm text-gray-600">
                         <Mail className="w-4 h-4 mr-2" />
-                        Email
+                        {user.email}
                       </div>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Phone className="w-4 h-4 mr-2" />
-                        {user.phone}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {user.location}
+                      {user.phone && (
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Phone className="w-4 h-4 mr-2" />
+                          {user.phone}
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="py-4 px-6">
@@ -153,24 +121,28 @@ export default function Users() {
                     </span>
                   </td>
                   <td className="py-4 px-6 text-sm text-gray-600">
-                    {user.lastVisit}
+                    {format(new Date(user.created_at), 'dd MMMM yyyy', { locale: fr })}
                   </td>
-                  <td className="py-4 px-6">
-                    <div className="flex flex-wrap gap-1">
-                      {user.treatments.map((treatment, index) => (
-                        <span 
-                          key={index}
-                          className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium"
-                        >
-                          {treatment}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <button className="p-2 hover:bg-gray-100 rounded-lg">
+                  <td className="py-4 px-6 relative">
+                    <button 
+                      className="p-2 hover:bg-gray-100 rounded-lg"
+                      onClick={() => setActiveMenu(activeMenu === user.id ? null : user.id)}
+                    >
                       <MoreVertical className="w-5 h-5 text-gray-400" />
                     </button>
+                    {activeMenu === user.id && (
+                      <div 
+                        className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 z-10"
+                        onClick={() => setActiveMenu(null)}
+                      >
+                        <Link 
+                          href={`/admin/users/${user.id}`}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+                        >
+                          Voir plus de détails
+                        </Link>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

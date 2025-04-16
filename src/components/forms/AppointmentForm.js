@@ -1,15 +1,42 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, Clock, User, X } from 'lucide-react';
 
-export function AppointmentForm({ isOpen, onClose }) {
+export function AppointmentForm({ isOpen, onClose, onSubmit, initialData }) {
   const [formData, setFormData] = useState({
+    title: '',
     date: '',
     time: '',
-    treatment: '',
+    practitioner: '',
+    location: '',
+    treatments: [],
     notes: ''
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title || '',
+        date: initialData.date || '',
+        time: initialData.time || '',
+        practitioner: initialData.practitioner || '',
+        location: initialData.location || '',
+        treatments: initialData.treatments || [],
+        notes: initialData.notes || ''
+      });
+    } else {
+      setFormData({
+        title: '',
+        date: '',
+        time: '',
+        practitioner: '',
+        location: '',
+        treatments: [],
+        notes: ''
+      });
+    }
+  }, [initialData]);
 
   const treatments = [
     'Rajeunissement du visage',
@@ -19,10 +46,20 @@ export function AppointmentForm({ isOpen, onClose }) {
     'Lifting plasma',
   ];
 
+  const practitioners = [
+    'Dr. Sophie Martin',
+    'Dr. Marie Dubois',
+    'Dr. Jean Dupont'
+  ];
+
+  const locations = [
+    'Cabinet Principal',
+    'Cabinet Annexe'
+  ];
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Logique de soumission à implémenter
-    onClose();
+    onSubmit(formData);
   };
 
   if (!isOpen) return null;
@@ -37,11 +74,27 @@ export function AppointmentForm({ isOpen, onClose }) {
           >
             <X className="w-6 h-6" />
           </button>
-          <h2 className="text-2xl font-semibold pr-8">Nouveau rendez-vous</h2>
+          <h2 className="text-2xl font-semibold pr-8">
+            {initialData ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous'}
+          </h2>
         </div>
 
         <div className="p-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           <form onSubmit={handleSubmit} id="appointmentForm" className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Titre
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="input"
+                placeholder="Ex: Consultation initiale"
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Date
@@ -76,15 +129,53 @@ export function AppointmentForm({ isOpen, onClose }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Traitement
+                Praticien
               </label>
               <select
                 required
-                value={formData.treatment}
-                onChange={(e) => setFormData({ ...formData, treatment: e.target.value })}
+                value={formData.practitioner}
+                onChange={(e) => setFormData({ ...formData, practitioner: e.target.value })}
                 className="input"
               >
-                <option value="">Sélectionnez un traitement</option>
+                <option value="">Sélectionnez un praticien</option>
+                {practitioners.map((practitioner) => (
+                  <option key={practitioner} value={practitioner}>
+                    {practitioner}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lieu
+              </label>
+              <select
+                required
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                className="input"
+              >
+                <option value="">Sélectionnez un lieu</option>
+                {locations.map((location) => (
+                  <option key={location} value={location}>
+                    {location}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Traitements
+              </label>
+              <select
+                required
+                value={formData.treatments}
+                onChange={(e) => setFormData({ ...formData, treatments: Array.from(e.target.selectedOptions, option => option.value) })}
+                className="input"
+                multiple
+              >
                 {treatments.map((treatment) => (
                   <option key={treatment} value={treatment}>
                     {treatment}
@@ -121,7 +212,7 @@ export function AppointmentForm({ isOpen, onClose }) {
               form="appointmentForm"
               className="btn-primary"
             >
-              Confirmer
+              {initialData ? 'Mettre à jour' : 'Créer'}
             </button>
           </div>
         </div>

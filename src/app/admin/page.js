@@ -1,94 +1,50 @@
 'use client'
 
-import { Users, Calendar, TrendingUp, FileText, Package } from 'lucide-react';
+import { Users, Calendar, TrendingUp, FileText, Package, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useAdminDashboard } from '@/hooks/useAdminDashboard';
 
 export default function AdminDashboard() {
-  const stats = [
+  const { stats, isLoading, error } = useAdminDashboard();
+
+  const dashboardStats = stats ? [
     {
       id: 1,
-      name: 'Clients actifs',
-      value: '521',
-      change: '+5%',
+      name: 'Clients',
+      value: stats.clients.total,
+      change: `+${stats.clients.newThisMonth} ce mois`,
       changeType: 'increase',
       icon: Users
     },
     {
       id: 2,
       name: 'Rendez-vous aujourd\'hui',
-      value: '12',
-      change: '+2',
-      changeType: 'increase',
+      value: stats.appointments.today,
+      change: `${stats.appointments.thisWeek} cette semaine`,
+      changeType: 'neutral',
       icon: Calendar
     },
     {
       id: 3,
-      name: 'Taux de conversion',
-      value: '24.57%',
-      change: '+2.5%',
-      changeType: 'increase',
+      name: 'Programmes actifs',
+      value: stats.programs.active,
+      change: `${stats.programs.ending} se terminent bientôt`,
+      changeType: stats.programs.ending > 0 ? 'warning' : 'neutral',
       icon: TrendingUp
     },
     {
       id: 4,
-      name: 'Traitements en cours',
-      value: '18',
-      change: '-3',
-      changeType: 'decrease',
+      name: 'Traitements',
+      value: stats.treatments.total,
+      change: `${stats.treatments.byCategory.length} catégories`,
+      changeType: 'neutral',
       icon: FileText
     }
-  ];
+  ] : [];
 
-  const recentAppointments = [
-    {
-      id: 1,
-      client: 'Marie Dupont',
-      treatment: 'Traitement Anti-âge',
-      date: '15 Avril 2025',
-      time: '14:30',
-      status: 'confirmed'
-    },
-    {
-      id: 2,
-      client: 'Sophie Martin',
-      treatment: 'Lifting Non-chirurgical',
-      date: '15 Avril 2025',
-      time: '15:45',
-      status: 'pending'
-    },
-    {
-      id: 3,
-      client: 'Julie Lambert',
-      treatment: 'Soin Éclaircissant',
-      date: '15 Avril 2025',
-      time: '16:30',
-      status: 'cancelled'
-    }
-  ];
+  const recentAppointments = stats?.upcomingAppointments || [];
 
-  const popularTreatments = [
-    {
-      id: 1,
-      name: 'Traitement Anti-âge',
-      bookings: 45,
-      growth: '+12%',
-      revenue: '11,250€'
-    },
-    {
-      id: 2,
-      name: 'Lifting Non-chirurgical',
-      bookings: 32,
-      growth: '+8%',
-      revenue: '6,400€'
-    },
-    {
-      id: 3,
-      name: 'Soin Éclaircissant',
-      bookings: 28,
-      growth: '+15%',
-      revenue: '4,200€'
-    }
-  ];
+  const popularTreatments = stats?.treatments.mostBooked || [];
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -121,18 +77,21 @@ export default function AdminDashboard() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-2xl font-bold">Tableau de bord</h1>
         <div className="flex flex-col sm:flex-row gap-2">
-          <button className="btn-primary">
-            Nouveau rendez-vous
-          </button>
-          <button className="btn-secondary">
-            Exporter les données
-          </button>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg">
+          {error}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {dashboardStats.map((stat) => (
           <div key={stat.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -148,6 +107,34 @@ export default function AdminDashboard() {
             <p className="text-gray-600">{stat.name}</p>
           </div>
         ))}
+      </div>
+      )}
+
+      {/* Revenue Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+          <h3 className="text-2xl font-bold mb-1">
+            {stats?.treatments.revenueFromAppointments.toLocaleString('fr-FR')} €
+          </h3>
+          <p className="text-gray-600">Revenus des rendez-vous confirmés</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Package className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+          <h3 className="text-2xl font-bold mb-1">
+            {stats?.treatments.revenueFromPrograms.toLocaleString('fr-FR')} €
+          </h3>
+          <p className="text-gray-600">Revenus des programmes</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -170,7 +157,7 @@ export default function AdminDashboard() {
                       <Calendar className="w-6 h-6 text-gray-400" />
                     </div>
                     <div>
-                      <p className="font-medium">{appointment.client}</p>
+                      <p className="font-medium">{appointment.client_name}</p>
                       <p className="text-sm text-gray-500">
                         {appointment.treatment}
                       </p>
@@ -178,7 +165,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex items-center gap-4">
                     <p className="text-sm text-gray-500">
-                      {appointment.time}
+                      {appointment.date} {appointment.time}
                     </p>
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
                       {translateStatus(appointment.status)}
@@ -202,7 +189,7 @@ export default function AdminDashboard() {
           </div>
           <div className="divide-y divide-gray-100">
             {popularTreatments.map((treatment) => (
-              <div key={treatment.id} className="p-6">
+              <div key={treatment.name} className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
@@ -211,14 +198,13 @@ export default function AdminDashboard() {
                     <div>
                       <p className="font-medium">{treatment.name}</p>
                       <p className="text-sm text-gray-500">
-                        {treatment.bookings} réservations
+                        {treatment.count} réservations
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">{treatment.revenue}</p>
-                    <p className="text-sm text-green-600">
-                      {treatment.growth}
+                    <p className="text-sm text-gray-500">
+                      {treatment.count} réservations ce mois
                     </p>
                   </div>
                 </div>

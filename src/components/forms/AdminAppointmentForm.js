@@ -2,43 +2,70 @@
 
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, Search, User, X } from 'lucide-react';
+import { useAppointments } from '@/hooks/useAppointments';
+import axios from '@/lib/axios';
 
 export function AdminAppointmentForm({ isOpen, onClose, appointment = null }) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [users, setUsers] = useState([]);
+  const [treatments, setTreatments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     userId: '',
     date: '',
     time: '',
     treatment: '',
+    status: 'pending',
     notes: ''
   });
 
-  // Mock data pour les utilisateurs
-  const users = [
-    { id: 1, name: 'Sophie Martin', email: 'sophie.martin@email.com' },
-    { id: 2, name: 'Lucas Bernard', email: 'lucas.bernard@email.com' },
-    { id: 3, name: 'Emma Dubois', email: 'emma.dubois@email.com' },
-    { id: 4, name: 'Thomas Petit', email: 'thomas.petit@email.com' }
-  ];
+  const { createAppointment, updateAppointment, refreshAppointments } = useAppointments();
 
-  const treatments = [
-    'Rajeunissement du visage',
-    'Traitement de l\'acné',
-    'Soins anti-âge',
-    'Traitement des cicatrices',
-    'Lifting plasma',
-  ];
+  useEffect(() => {
+    setIsLoading(true);
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('/api/users');
+        setUsers(response.data);
+      } catch (error) {
+        console.error('Erreur lors du chargement des clients:', error);
+      }
+    };
+
+    const fetchTreatments = async () => {
+      try {
+        const response = await axios.get('/api/treatments');
+        setTreatments(response.data);
+      } catch (error) {
+        console.error('Erreur lors du chargement des traitements:', error);
+      }
+    };
+
+    Promise.all([fetchUsers(), fetchTreatments()])
+      .finally(() => setIsLoading(false));
+  }, []);
 
   useEffect(() => {
     if (appointment) {
-      // Si on modifie un rendez-vous existant
-      setFormData({
-        userId: appointment.client.id || '',
-        date: appointment.date || '',
-        time: appointment.time || '',
-        treatment: appointment.treatment || '',
-        notes: appointment.notes || ''
-      });
+      try {
+        // Si on modifie un rendez-vous existant
+        setFormData({
+          userId: appointment.user?.id || '',
+          date: appointment.date || '',
+          time: appointment.time || '',
+          treatment: appointment.treatment?.id || '',
+          notes: appointment.notes || ''
+        });
+      } catch (error) {
+        console.error('Erreur lors du chargement de la date:', error);
+        // Fallback to empty form
+        setFormData({
+          userId: appointment.user?.id || '',
+          date: '',
+          time: '',
+          treatment: appointment.treatment?.id || '',
+          notes: appointment.notes || ''
+        });
+      }
     } else {
       // Si on crée un nouveau rendez-vous
       setFormData({
@@ -51,21 +78,39 @@ export function AdminAppointmentForm({ isOpen, onClose, appointment = null }) {
     }
   }, [appointment]);
 
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Si on modifie un rendez-vous existant
-    if (appointment) {
-      console.log('Modification du rendez-vous:', { id: appointment.id, ...formData });
-    } else {
-      // Si on crée un nouveau rendez-vous
-      console.log('Nouveau rendez-vous:', formData);
+    try {
+      const appointmentData = {
+        user_id: formData.userId,
+        treatment_id: formData.treatment,
+        date: formData.date,
+        time: formData.time,
+        status: formData.status || 'pending',
+        notes: formData.notes
+      };
+
+      console.log('Données envoyées:', appointmentData);
+
+      let result;
+      if (appointment) {
+        result = await updateAppointment(appointment.id, appointmentData);
+      } else {
+        result = await createAppointment(appointmentData);
+      }
+
+      if (result.success) {
+        await refreshAppointments();
+        onClose();
+      } else {
+        alert(result.error || 'Une erreur est survenue lors de l\'enregistrement du rendez-vous.');
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement:', error);
+      alert('Une erreur est survenue lors de l\'enregistrement du rendez-vous.');
     }
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -91,51 +136,27 @@ export function AdminAppointmentForm({ isOpen, onClose, appointment = null }) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Client
               </label>
-              <div className="space-y-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="Rechercher un client..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="input pl-10"
-                  />
-                </div>
-                <div className="border rounded-lg max-h-40 overflow-y-auto">
-                  {filteredUsers.map((user) => (
-                    <label
-                      key={user.id}
-                      className={`
-                        flex items-center p-3 cursor-pointer hover:bg-gray-50
-                        ${formData.userId === user.id ? 'bg-primary/5' : ''}
-                        ${filteredUsers.length > 1 ? 'border-b' : ''}
-                      `}
-                    >
-                      <input
-                        type="radio"
-                        name="user"
-                        checked={formData.userId === user.id}
-                        onChange={() => setFormData({ ...formData, userId: user.id })}
-                        className="sr-only"
-                      />
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                          <User className="w-4 h-4 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">{user.name}</p>
-                          <p className="text-xs text-gray-500">{user.email}</p>
-                        </div>
-                      </div>
-                    </label>
-                  ))}
-                  {filteredUsers.length === 0 && (
-                    <div className="p-3 text-sm text-gray-500 text-center">
-                      Aucun client trouvé
-                    </div>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <select
+                  required
+                  value={formData.userId}
+                  onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
+                  className="input pl-10"
+                >
+                  <option value="">Sélectionnez un client</option>
+                  {isLoading ? (
+                    <option value="" disabled>Chargement des clients...</option>
+                  ) : users && users.length > 0 ? (
+                    users.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name} - {user.email}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="" disabled>Aucun client disponible</option>
                   )}
-                </div>
+                </select>
               </div>
             </div>
 
@@ -182,11 +203,17 @@ export function AdminAppointmentForm({ isOpen, onClose, appointment = null }) {
                 className="input"
               >
                 <option value="">Sélectionnez un traitement</option>
-                {treatments.map((treatment) => (
-                  <option key={treatment} value={treatment}>
-                    {treatment}
-                  </option>
-                ))}
+                {isLoading ? (
+                  <option value="" disabled>Chargement des traitements...</option>
+                ) : treatments && treatments.length > 0 ? (
+                  treatments.map((treatment) => (
+                    <option key={treatment.id} value={treatment.id}>
+                      {treatment.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>Aucun traitement disponible</option>
+                )}
               </select>
             </div>
 
@@ -200,6 +227,22 @@ export function AdminAppointmentForm({ isOpen, onClose, appointment = null }) {
                 className="input min-h-[100px]"
                 placeholder="Ajoutez des notes ou des précisions..."
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Statut
+              </label>
+              <select
+                required
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="input"
+              >
+                <option value="pending">En attente</option>
+                <option value="confirmed">Confirmé</option>
+                <option value="cancelled">Annulé</option>
+              </select>
             </div>
           </form>
         </div>

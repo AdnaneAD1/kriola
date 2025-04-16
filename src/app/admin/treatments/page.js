@@ -4,12 +4,31 @@ import { useState } from 'react';
 import { Plus, Sparkles } from 'lucide-react';
 import { TreatmentForm } from '../../../components/forms/TreatmentForm';
 import { DropdownMenu } from '../../../components/ui/DropdownMenu';
+import { useTreatments } from '@/hooks/useTreatments';
 
 export default function AdminTreatments() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTreatment, setEditingTreatment] = useState(null);
+  const { treatments, loading, error, createTreatment, updateTreatment, deleteTreatment } = useTreatments();
 
-  const treatments = [
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-500">Une erreur est survenue lors du chargement des traitements.</div>
+      </div>
+    );
+  }
+
+  // Données de secours si l'API ne renvoie rien
+  const mockTreatments = [
     {
       id: 1,
       name: 'Traitement Anti-âge',
@@ -20,7 +39,7 @@ export default function AdminTreatments() {
       status: 'active',
       bookings: 45,
       rating: 4.8,
-      practitioners: ['Dr. Sophie Martin', 'Dr. Marie Dubois']
+
     },
     {
       id: 2,
@@ -32,7 +51,7 @@ export default function AdminTreatments() {
       status: 'active',
       bookings: 32,
       rating: 4.6,
-      practitioners: ['Dr. Marie Dubois']
+
     },
     {
       id: 3,
@@ -44,7 +63,7 @@ export default function AdminTreatments() {
       status: 'inactive',
       bookings: 28,
       rating: 4.7,
-      practitioners: ['Dr. Sophie Martin']
+
     }
   ];
 
@@ -53,14 +72,24 @@ export default function AdminTreatments() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (treatmentId) => {
-    // Logique de suppression à implémenter
-    console.log('Suppression du traitement:', treatmentId);
+  const handleDelete = async (treatmentId) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce traitement ?')) {
+      try {
+        await deleteTreatment(treatmentId);
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+      }
+    }
   };
 
-  const handleToggleStatus = (treatmentId) => {
-    // Logique de changement de statut à implémenter
-    console.log('Changement de statut du traitement:', treatmentId);
+  const handleToggleStatus = async (treatmentId, currentStatus) => {
+    try {
+      await updateTreatment(treatmentId, {
+        status: currentStatus === 'active' ? 'inactive' : 'active'
+      });
+    } catch (error) {
+      console.error('Erreur lors du changement de statut:', error);
+    }
   };
 
   const formatPrice = (price) => {
@@ -87,7 +116,7 @@ export default function AdminTreatments() {
       </div>
 
       <div className="grid gap-6">
-        {treatments.map((treatment) => (
+        {treatments?.map((treatment) => (
           <div key={treatment.id} className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
@@ -116,10 +145,6 @@ export default function AdminTreatments() {
                       onClick: () => handleEdit(treatment)
                     },
                     {
-                      label: treatment.status === 'active' ? 'Désactiver' : 'Activer',
-                      onClick: () => handleToggleStatus(treatment.id)
-                    },
-                    {
                       label: 'Supprimer',
                       onClick: () => handleDelete(treatment.id),
                       destructive: true
@@ -141,31 +166,12 @@ export default function AdminTreatments() {
                 </div>
                 <div>
                   <span className="text-sm font-medium text-gray-700">Durée:</span>
-                  <span className="ml-2">{treatment.duration}</span>
+                  <span className="ml-2">{treatment.duration} minutes</span>
                 </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Réservations:</span>
-                  <span className="ml-2">{treatment.bookings}</span>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Note:</span>
-                  <span className="ml-2">{treatment.rating}/5</span>
-                </div>
+
               </div>
 
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Praticiens</h4>
-                <div className="flex flex-wrap gap-2">
-                  {treatment.practitioners.map((practitioner, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary"
-                    >
-                      {practitioner}
-                    </span>
-                  ))}
-                </div>
-              </div>
+
             </div>
           </div>
         ))}

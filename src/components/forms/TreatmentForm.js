@@ -2,24 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useTreatments } from '@/hooks/useTreatments';
 
 export function TreatmentForm({ isOpen, onClose, treatment = null }) {
+  const { createTreatment, updateTreatment } = useTreatments();
   const [formData, setFormData] = useState({
     name: '',
     category: '',
     duration: '',
     price: '',
-    description: '',
-    practitioners: []
+    description: ''
   });
 
-  // Mock data pour les praticiens
-  const practitioners = [
-    'Dr. Sophie Martin',
-    'Dr. Marie Dubois',
-    'Dr. Jean Dupont',
-    'Dr. Pierre Lambert'
-  ];
 
   useEffect(() => {
     if (treatment) {
@@ -29,8 +23,7 @@ export function TreatmentForm({ isOpen, onClose, treatment = null }) {
         category: treatment.category || '',
         duration: treatment.duration || '',
         price: treatment.price ? treatment.price.toString() : '',
-        description: treatment.description || '',
-        practitioners: treatment.practitioners || []
+        description: treatment.description || ''
       });
     } else {
       // Si on crée un nouveau traitement
@@ -39,32 +32,26 @@ export function TreatmentForm({ isOpen, onClose, treatment = null }) {
         category: '',
         duration: '',
         price: '',
-        description: '',
-        practitioners: []
+        description: ''
       });
     }
   }, [treatment]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Si on modifie un traitement existant
-    if (treatment) {
-      console.log('Modification du traitement:', { id: treatment.id, ...formData });
-    } else {
-      // Si on crée un nouveau traitement
-      console.log('Nouveau traitement:', formData);
+    try {
+      if (treatment) {
+        await updateTreatment(treatment.id, formData);
+      } else {
+        await createTreatment(formData);
+      }
+      onClose();
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert('Une erreur est survenue lors de la sauvegarde du traitement.');
     }
-    onClose();
   };
 
-  const handlePractitionerToggle = (practitioner) => {
-    setFormData(prev => ({
-      ...prev,
-      practitioners: prev.practitioners.includes(practitioner)
-        ? prev.practitioners.filter(p => p !== practitioner)
-        : [...prev.practitioners, practitioner]
-    }));
-  };
 
   if (!isOpen) return null;
 
@@ -79,7 +66,7 @@ export function TreatmentForm({ isOpen, onClose, treatment = null }) {
             <X className="w-6 h-6" />
           </button>
           <h2 className="text-2xl font-semibold pr-8">
-            {treatment ? 'Modifier le traitement' : 'Nouveau traitement'}
+            {treatment ? `Modifier ${treatment.name}` : 'Nouveau traitement'}
           </h2>
         </div>
 
@@ -115,15 +102,16 @@ export function TreatmentForm({ isOpen, onClose, treatment = null }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Durée
+                Durée (en minutes)
               </label>
               <input
-                type="text"
+                type="number"
                 required
+                min="1"
                 value={formData.duration}
                 onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                 className="input"
-                placeholder="Ex: 1h"
+                placeholder="Ex: 30"
               />
             </div>
 
@@ -154,27 +142,7 @@ export function TreatmentForm({ isOpen, onClose, treatment = null }) {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Praticiens
-              </label>
-              <div className="space-y-2">
-                {practitioners.map((practitioner) => (
-                  <label
-                    key={practitioner}
-                    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.practitioners.includes(practitioner)}
-                      onChange={() => handlePractitionerToggle(practitioner)}
-                      className="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span className="text-sm">{practitioner}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+
           </form>
         </div>
 
@@ -192,7 +160,7 @@ export function TreatmentForm({ isOpen, onClose, treatment = null }) {
               form="treatmentForm"
               className="btn-primary"
             >
-              {treatment ? 'Modifier' : 'Créer'}
+              {treatment ? 'Enregistrer les modifications' : 'Créer le traitement'}
             </button>
           </div>
         </div>
