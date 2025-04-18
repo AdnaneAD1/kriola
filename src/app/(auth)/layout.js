@@ -1,6 +1,3 @@
-import Link from 'next/link'
-import AuthCard from '@/app/(auth)/AuthCard'
-
 export const metadata = {
     title: 'KriolaCare',
 }

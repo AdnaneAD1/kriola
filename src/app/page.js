@@ -41,22 +41,6 @@ export default function Home() {
 
             {/* Hero Image Section */}
             <div className="relative mx-auto max-w-5xl animate-fade-in delay-300">
-              {/* Floating Stats */}
-              <div className="absolute top-4 right-4 md:-top-4 md:-right-4 bg-white rounded-2xl shadow-lg p-4 z-10 animate-float">
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  <span className="font-semibold">Note moyenne: 4.9/5</span>
-                </div>
-              </div>
-
-              {/* Floating Achievement */}
-              <div className="absolute top-4 left-4 md:-top-4 md:-left-4 bg-white rounded-2xl shadow-lg p-4 z-10 animate-float delay-150">
-                <div className="flex items-center gap-2">
-                  <Award className="w-5 h-5 text-primary" />
-                  <span className="font-semibold">N°1 en France</span>
-                </div>
-              </div>
-
               {/* Main Image with Gradient Overlay */}
               <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent z-10"></div>
@@ -65,24 +49,6 @@ export default function Home() {
                   alt="Traitement KriolaCare"
                   className="w-full transform hover:scale-105 transition-transform duration-700"
                 />
-              </div>
-
-              {/* Stats Bar */}
-              <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-white rounded-2xl shadow-lg p-6 w-[90%] md:w-auto">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12">
-                  <div className="text-center">
-                    <div className="font-bold text-3xl text-primary">98%</div>
-                    <div className="text-sm text-gray-600">Satisfaction Client</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-3xl text-primary">5000+</div>
-                    <div className="text-sm text-gray-600">Traitements Réalisés</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-3xl text-primary">15+</div>
-                    <div className="text-sm text-gray-600">Années d'Expertise</div>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -96,10 +62,6 @@ export default function Home() {
                 <p className="text-gray-600 mb-6">
                   Plans de traitement sur mesure adaptés à vos besoins uniques et à vos objectifs cutanés.
                 </p>
-                <a href="#" className="inline-flex items-center text-primary group/link">
-                  En savoir plus
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                </a>
               </div>
               
               <div className="feature-card group">
@@ -110,10 +72,6 @@ export default function Home() {
                 <p className="text-gray-600 mb-6">
                   Thérapie plasma froid de pointe pour des résultats optimaux et une peau éclatante.
                 </p>
-                <a href="#" className="inline-flex items-center text-primary group/link">
-                  En savoir plus
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                </a>
               </div>
               
               <div className="feature-card group">
@@ -124,70 +82,6 @@ export default function Home() {
                 <p className="text-gray-600 mb-6">
                   Support professionnel tout au long de votre parcours de soins de la peau.
                 </p>
-                <a href="#" className="inline-flex items-center text-primary group/link">
-                  En savoir plus
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                </a>
-              </div>
-            </div>
-
-            {/* Testimonials Section */}
-            <div className="mt-32 text-center">
-              <p className="text-sm text-gray-500 mb-8">Ils nous font confiance</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="flex flex-col items-center">
-                  <div className="relative w-24 h-24 mb-4">
-                    <div className="absolute -top-1 -left-1 w-24 h-24 bg-primary/10 rounded-full blur-xl"></div>
-                    <img 
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80"
-                      alt="Sarah M."
-                      className="relative w-24 h-24 rounded-full object-cover ring-4 ring-primary/20"
-                    />
-                  </div>
-                  <p className="font-medium">Sarah M.</p>
-                  <p className="text-sm text-gray-500">Cliente depuis 2 ans</p>
-                  <div className="flex items-center mt-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center">
-                  <div className="relative w-24 h-24 mb-4">
-                    <div className="absolute -top-1 -left-1 w-24 h-24 bg-primary/10 rounded-full blur-xl"></div>
-                    <img 
-                      src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=300&h=300&q=80"
-                      alt="Emma L."
-                      className="relative w-24 h-24 rounded-full object-cover ring-4 ring-primary/20"
-                    />
-                  </div>
-                  <p className="font-medium">Emma L.</p>
-                  <p className="text-sm text-gray-500">Cliente depuis 1 an</p>
-                  <div className="flex items-center mt-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center">
-                  <div className="relative w-24 h-24 mb-4">
-                    <div className="absolute -top-1 -left-1 w-24 h-24 bg-primary/10 rounded-full blur-xl"></div>
-                    <img 
-                      src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&h=300&q=80"
-                      alt="Marie P."
-                      className="relative w-24 h-24 rounded-full object-cover ring-4 ring-primary/20"
-                    />
-                  </div>
-                  <p className="font-medium">Marie P.</p>
-                  <p className="text-sm text-gray-500">Cliente depuis 3 ans</p>
-                  <div className="flex items-center mt-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
