@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Lock } from 'lucide-react'
-import { Logo } from '../../../../components/ui/Logo'
-import { useAuth } from '@/hooks/auth'
+import { AuthLogo } from '../../../../components/ui/AuthLogo'
+import { useAuth, translateStatus } from '@/hooks/auth'
 import AuthSessionStatus from '@/app/(auth)/AuthSessionStatus'
+import { LoadingButton } from '@/components/ui/LoadingButton'
 
 export default function PasswordReset({ params }) {
   const { resetPassword } = useAuth({
@@ -21,18 +22,24 @@ export default function PasswordReset({ params }) {
 
   const [errors, setErrors] = useState([])
   const [status, setStatus] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const submitForm = async (e) => {
     e.preventDefault()
-
-    await resetPassword({
-      email: formData.email,
-      password: formData.password,
-      password_confirmation: formData.password_confirmation,
-      token: params.token,
-      setErrors,
-      setStatus,
-    })
+    setIsLoading(true)
+    
+    try {
+      await resetPassword({
+        email: formData.email,
+        password: formData.password,
+        password_confirmation: formData.password_confirmation,
+        token: params.token,
+        setErrors,
+        setStatus: (message) => setStatus(translateStatus(message)),
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -40,7 +47,7 @@ export default function PasswordReset({ params }) {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <Link href="/" className="inline-block">
-            <Logo />
+            <AuthLogo />
           </Link>
         </div>
 
@@ -122,9 +129,9 @@ export default function PasswordReset({ params }) {
             </div>
 
             <div>
-              <button type="submit" className="btn-primary w-full">
+              <LoadingButton type="submit" className="w-full" isLoading={isLoading}>
                 Réinitialiser le mot de passe
-              </button>
+              </LoadingButton>
             </div>
           </form>
         </div>

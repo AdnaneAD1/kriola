@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, RefreshCw, LogOut } from 'lucide-react'
-import { Logo } from '../../../components/ui/Logo'
-import { useAuth } from '@/hooks/auth'
+import { AuthLogo } from '../../../components/ui/AuthLogo'
+import { useAuth, translateStatus } from '@/hooks/auth'
 import AuthSessionStatus from '@/app/(auth)/AuthSessionStatus'
+import { LoadingButton } from '@/components/ui/LoadingButton'
 
 export default function VerifyEmail() {
   const { logout, resendEmailVerification } = useAuth({
@@ -14,11 +15,18 @@ export default function VerifyEmail() {
   })
 
   const [status, setStatus] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const resendEmail = () => {
-    resendEmailVerification({
-      setStatus,
-    })
+  const resendEmail = async () => {
+    setIsLoading(true)
+    
+    try {
+      await resendEmailVerification({
+        setStatus: (message) => setStatus(translateStatus(message)),
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -26,12 +34,12 @@ export default function VerifyEmail() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <Link href="/" className="inline-block">
-            <Logo />
+            <AuthLogo />
           </Link>
         </div>
 
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Vérification de l'email
+          Vérification de l&apos;email
         </h2>
 
         <div className="mt-8 bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
@@ -45,14 +53,15 @@ export default function VerifyEmail() {
           </div>
 
           <div className="mt-4 flex flex-col space-y-4">
-            <button
+            <LoadingButton
               onClick={resendEmail}
               type="button"
-              className="btn-primary w-full flex justify-center items-center"
+              className="w-full flex justify-center items-center"
+              isLoading={isLoading}
             >
-              <RefreshCw className="w-5 h-5 mr-2" />
-              Renvoyer l'email de vérification
-            </button>
+              {!isLoading && <RefreshCw className="w-5 h-5 mr-2" />}
+              Renvoyer l&apos;email de vérification
+            </LoadingButton>
 
             <button
               onClick={logout}
@@ -68,7 +77,7 @@ export default function VerifyEmail() {
               className="btn-outline w-full flex justify-center items-center"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
-              Retour à l'accueil
+              Retour à l&apos;accueil
             </Link>
           </div>
         </div>

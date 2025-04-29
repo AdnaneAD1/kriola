@@ -3,6 +3,50 @@ import axios from '@/lib/axios'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
+// Fonction pour traduire les messages d'erreur en français
+const translateErrors = (errors) => {
+    const translations = {
+        // Messages d'erreur généraux
+        'The email field is required.': 'Le champ email est requis.',
+        'The password field is required.': 'Le champ mot de passe est requis.',
+        'These credentials do not match our records.': 'Ces identifiants ne correspondent pas à nos enregistrements.',
+        'The provided password is incorrect.': 'Le mot de passe fourni est incorrect.',
+        'The email must be a valid email address.': 'L\'email doit être une adresse email valide.',
+        'The password must be at least 8 characters.': 'Le mot de passe doit contenir au moins 8 caractères.',
+        'The password confirmation does not match.': 'La confirmation du mot de passe ne correspond pas.',
+        'The email has already been taken.': 'Cette adresse email est déjà utilisée.',
+        'The name field is required.': 'Le champ nom est requis.',
+        'The password confirmation field is required.': 'La confirmation du mot de passe est requise.',
+        'The terms must be accepted.': 'Les conditions d\'utilisation doivent être acceptées.',
+    };
+
+    if (!errors) return {};
+
+    const translatedErrors = {};
+    Object.keys(errors).forEach(key => {
+        translatedErrors[key] = errors[key].map(message => {
+            return translations[message] || message;
+        });
+    });
+
+    return translatedErrors;
+};
+
+// Fonction pour traduire les messages de succès en français
+export const translateStatus = (status) => {
+    const translations = {
+        // Messages de succès
+        'We have emailed your password reset link.': 'Nous avons envoyé un lien de réinitialisation de mot de passe à votre adresse email.',
+        'Your password has been reset!': 'Votre mot de passe a été réinitialisé !',
+        'A new verification link has been sent to the email address you provided during registration.': 'Un nouveau lien de vérification a été envoyé à l\'adresse email que vous avez fournie lors de l\'inscription.',
+        'Your email has been verified.': 'Votre adresse email a été vérifiée.',
+        'Your password has been updated.': 'Votre mot de passe a été mis à jour.',
+        'Your profile has been updated.': 'Votre profil a été mis à jour.',
+    };
+
+    return translations[status] || status;
+};
+
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
 
@@ -21,24 +65,24 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
 
     const register = async ({ setErrors, ...props }) => {
         try {
-            console.log('Starting registration process...');
-            console.log('Registration data:', props);
+            console.log('Démarrage du processus d\'inscription...');
+            console.log('Données d\'inscription:', props);
 
             await csrf();
-            console.log('CSRF token obtained');
+            console.log('Jeton CSRF obtenu');
 
             setErrors([]);
 
             const response = await axios.post('/register', props);
-            console.log('Registration response:', response.data);
+            console.log('Réponse d\'inscription:', response.data);
 
             await mutate();
             return response.data;
         } catch (error) {
-            console.error('Registration error:', error.response || error);
+            console.error('Erreur d\'inscription:', error.response || error);
 
             if (error.response?.status === 422) {
-                setErrors(error.response.data.errors);
+                setErrors(translateErrors(error.response.data.errors));
             } else {
                 setErrors({
                     general: ['Une erreur est survenue lors de l\'inscription. Veuillez réessayer.']
@@ -61,7 +105,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
             .catch(error => {
                 if (error.response.status !== 422) throw error
 
-                setErrors(error.response.data.errors)
+                setErrors(translateErrors(error.response.data.errors))
             })
     }
 
@@ -101,25 +145,25 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
             .catch(error => {
                 if (error.response.status !== 422) throw error
 
-                setErrors(error.response.data.errors)
+                setErrors(translateErrors(error.response.data.errors))
             })
     }
 
-    const resetPassword = async ({ setErrors, setStatus, ...props }) => {
+    const resetPassword = async ({ setErrors, setStatus, token, ...props }) => {
         await csrf()
 
         setErrors([])
         setStatus(null)
 
         axios
-            .post('/reset-password', { token: router.query.token, ...props })
-            .then(response =>
-                router.push('/login?reset=' + btoa(response.data.status)),
-            )
+            .post('/reset-password', { token, ...props })
+            .then(response => {
+                router.push('/login?reset=' + btoa(response.data.status))
+            })
             .catch(error => {
                 if (error.response.status !== 422) throw error
 
-                setErrors(error.response.data.errors)
+                setErrors(translateErrors(error.response.data.errors))
             })
     }
 
@@ -150,7 +194,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         )
             router.push(redirectIfAuthenticated)
         if (middleware === 'auth' && error) logout()
-    }, [user, error])
+    }, [user, error, middleware, redirectIfAuthenticated, router, logout])
 
     return {
         user,

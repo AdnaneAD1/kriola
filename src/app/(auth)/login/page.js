@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Mail, Lock } from 'lucide-react'
-import { Logo } from '../../../components/ui/Logo'
+import { AuthLogo } from '../../../components/ui/AuthLogo'
 import { useAuth } from '@/hooks/auth'
 import AuthSessionStatus from '@/app/(auth)/AuthSessionStatus'
 import { LoadingButton } from '@/components/ui/LoadingButton'
@@ -64,7 +64,7 @@ export default function Login() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <Link href="/" className="inline-block">
-            <Logo />
+            <AuthLogo />
           </Link>
         </div>
 

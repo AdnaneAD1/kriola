@@ -55,7 +55,7 @@ export function DiagnosisForm({ isOpen, onClose, onSubmit, diagnosis }) {
       event.target.reset();
       onClose();
     } catch (error) {
-      console.error('Erreur lors de la soumission:', error);
+      console.error('Erreur lors de la soumission du formulaire:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -88,11 +88,11 @@ export function DiagnosisForm({ isOpen, onClose, onSubmit, diagnosis }) {
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
           >
             <option value="">Sélectionnez un type</option>
-            <option value="normal">Normale</option>
-            <option value="dry">Sèche</option>
-            <option value="oily">Grasse</option>
-            <option value="combination">Mixte</option>
-            <option value="sensitive">Sensible</option>
+            <option value="normale">Normale</option>
+            <option value="sèche">Sèche</option>
+            <option value="grasse">Grasse</option>
+            <option value="mixte">Mixte</option>
+            <option value="sensible">Sensible</option>
           </select>
         </div>
 
@@ -100,19 +100,19 @@ export function DiagnosisForm({ isOpen, onClose, onSubmit, diagnosis }) {
           <label className="block text-sm font-medium text-gray-700">Préoccupations</label>
           <div className="mt-2 space-y-2">
             <div>
-              <input type="checkbox" name="concerns" value="acne" id="acne" className="mr-2" />
+              <input type="checkbox" name="concerns" value="acné" id="acne" className="mr-2" />
               <label htmlFor="acne">Acné</label>
             </div>
             <div>
-              <input type="checkbox" name="concerns" value="wrinkles" id="wrinkles" className="mr-2" />
+              <input type="checkbox" name="concerns" value="rides" id="wrinkles" className="mr-2" />
               <label htmlFor="wrinkles">Rides</label>
             </div>
             <div>
-              <input type="checkbox" name="concerns" value="dark_spots" id="dark_spots" className="mr-2" />
+              <input type="checkbox" name="concerns" value="taches_brunes" id="dark_spots" className="mr-2" />
               <label htmlFor="dark_spots">Taches brunes</label>
             </div>
             <div>
-              <input type="checkbox" name="concerns" value="redness" id="redness" className="mr-2" />
+              <input type="checkbox" name="concerns" value="rougeurs" id="redness" className="mr-2" />
               <label htmlFor="redness">Rougeurs</label>
             </div>
           </div>

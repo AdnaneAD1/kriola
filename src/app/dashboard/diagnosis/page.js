@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react';
-import { Plus, User } from 'lucide-react';
+import { Plus, User, FileText } from 'lucide-react';
 import { DiagnosisForm } from '../../../components/forms/DiagnosisForm';
 import { DropdownMenu } from '../../../components/ui/DropdownMenu';
 import { useDiagnosis } from '../../../hooks/useDiagnosis';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export default function Diagnosis() {
   const { diagnoses, isLoading, error, createDiagnosis, updateDiagnosis, deleteDiagnosis } = useDiagnosis();
@@ -21,7 +22,7 @@ export default function Diagnosis() {
       setIsFormOpen(false);
       setEditingDiagnosis(null);
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error('Erreur lors du traitement du diagnostic:', error);
     }
   };
 
@@ -35,7 +36,7 @@ export default function Diagnosis() {
       try {
         await deleteDiagnosis(diagnosisId);
       } catch (error) {
-        console.error('Erreur lors de la suppression:', error);
+        console.error('Erreur lors de la suppression du diagnostic:', error);
       }
     }
   };
@@ -65,101 +66,114 @@ export default function Diagnosis() {
       </div>
 
       <div className="grid gap-6">
-        {diagnoses.map((diagnosis) => (
-          <div key={diagnosis.id} className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary" />
+        {diagnoses.length > 0 ? (
+          diagnoses.map((diagnosis) => (
+            <div key={diagnosis.id} className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">{diagnosis.user_name}</h3>
+                    <p className="text-sm text-gray-500">{new Date(diagnosis.date).toLocaleDateString('fr-FR')}</p>
+                  </div>
                 </div>
+                <DropdownMenu
+                  items={[
+                    {
+                      label: 'Modifier',
+                      onClick: () => handleEdit(diagnosis)
+                    },
+                    {
+                      label: 'Supprimer',
+                      onClick: () => handleDelete(diagnosis.id),
+                      destructive: true
+                    }
+                  ]}
+                />
+              </div>
+
+              <div className="grid gap-4">
                 <div>
-                  <h3 className="font-medium">{diagnosis.user_name}</h3>
-                  <p className="text-sm text-gray-500">{new Date(diagnosis.date).toLocaleDateString('fr-FR')}</p>
+                  <h4 className="text-sm font-medium text-gray-700">Type de peau</h4>
+                  <p className="mt-1">{diagnosis.skin_type}</p>
                 </div>
-              </div>
-              <DropdownMenu
-                items={[
-                  {
-                    label: 'Modifier',
-                    onClick: () => handleEdit(diagnosis)
-                  },
-                  {
-                    label: 'Supprimer',
-                    onClick: () => handleDelete(diagnosis.id),
-                    destructive: true
-                  }
-                ]}
-              />
-            </div>
 
-            <div className="grid gap-4">
-              <div>
-                <h4 className="text-sm font-medium text-gray-700">Type de peau</h4>
-                <p className="mt-1">{diagnosis.skin_type}</p>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-medium text-gray-700">Préoccupations</h4>
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {diagnosis.concerns.map((concern, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary"
-                    >
-                      {concern}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {diagnosis.treatments && diagnosis.treatments.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700">Traitements recommandés</h4>
+                  <h4 className="text-sm font-medium text-gray-700">Préoccupations</h4>
                   <div className="mt-1 flex flex-wrap gap-2">
-                    {diagnosis.treatments.map((treatment, index) => (
+                    {diagnosis.concerns.map((concern, index) => (
                       <span
                         key={index}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary"
                       >
-                        {treatment}
+                        {concern}
                       </span>
                     ))}
                   </div>
                 </div>
-              )}
 
-              {diagnosis.recommendations && (
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700">Recommandations</h4>
-                  <p className="mt-1 text-gray-600">{diagnosis.recommendations}</p>
-                </div>
-              )}
-
-              {diagnosis.notes && (
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700">Notes</h4>
-                  <p className="mt-1 text-gray-600">{diagnosis.notes}</p>
-                </div>
-              )}
-
-              {diagnosis.photos && diagnosis.photos.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700">Photos</h4>
-                  <div className="mt-2 grid grid-cols-2 gap-2">
-                    {diagnosis.photos.map((photo, index) => (
-                      <img
-                        key={index}
-                        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${photo}`}
-                        alt={`Photo ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                    ))}
+                {diagnosis.treatments && diagnosis.treatments.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700">Traitements recommandés</h4>
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      {diagnosis.treatments.map((treatment, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                        >
+                          {treatment}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
+                {diagnosis.recommendations && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700">Recommandations</h4>
+                    <p className="mt-1 text-gray-600">{diagnosis.recommendations}</p>
+                  </div>
+                )}
+
+                {diagnosis.notes && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700">Notes</h4>
+                    <p className="mt-1 text-gray-600">{diagnosis.notes}</p>
+                  </div>
+                )}
+
+                {diagnosis.photos && diagnosis.photos.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700">Photos</h4>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      {diagnosis.photos.map((photo, index) => (
+                        <img
+                          key={index}
+                          src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${photo}`}
+                          alt={`Photo ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <EmptyState
+            icon={FileText}
+            title="Aucun diagnostic"
+            description="Vous n'avez pas encore créé de diagnostic. Cliquez sur le bouton 'Nouveau diagnostic' pour commencer."
+            actionLabel="Nouveau diagnostic"
+            onAction={() => {
+              setEditingDiagnosis(null);
+              setIsFormOpen(true);
+            }}
+          />
+        )}
       </div>
 
       <DiagnosisForm

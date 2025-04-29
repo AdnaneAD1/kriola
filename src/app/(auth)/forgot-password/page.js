@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Mail } from 'lucide-react'
-import { Logo } from '../../../components/ui/Logo'
+import { AuthLogo } from '../../../components/ui/AuthLogo'
 import { useAuth } from '@/hooks/auth'
+import { translateStatus } from '@/hooks/auth'
 import AuthSessionStatus from '@/app/(auth)/AuthSessionStatus'
+import { LoadingButton } from '@/components/ui/LoadingButton'
 
 export default function ForgotPassword() {
   const { forgotPassword } = useAuth({
@@ -16,15 +18,21 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState('')
   const [errors, setErrors] = useState([])
   const [status, setStatus] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const submitForm = async (e) => {
     e.preventDefault()
-
-    await forgotPassword({
-      email,
-      setErrors,
-      setStatus,
-    })
+    setIsLoading(true)
+    
+    try {
+      await forgotPassword({
+        email,
+        setErrors,
+        setStatus: (message) => setStatus(translateStatus(message)),
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -32,7 +40,7 @@ export default function ForgotPassword() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <Link href="/" className="inline-block">
-            <Logo />
+            <AuthLogo />
           </Link>
         </div>
 
@@ -50,7 +58,7 @@ export default function ForgotPassword() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
           <div className="mb-4 text-sm text-gray-600">
-            Vous avez oublié votre mot de passe ? Pas de problème. Indiquez-nous simplement votre adresse e-mail et nous vous enverrons un lien de réinitialisation qui vous permettra d'en choisir un nouveau.
+            Vous avez oublié votre mot de passe ? Pas de problème. Indiquez-nous simplement votre adresse e-mail et nous vous enverrons un lien de réinitialisation qui vous permettra d&apos;en choisir un nouveau.
           </div>
 
           <AuthSessionStatus className="mb-4" status={status} />
@@ -79,9 +87,9 @@ export default function ForgotPassword() {
             </div>
 
             <div>
-              <button type="submit" className="btn-primary w-full">
+              <LoadingButton type="submit" className="w-full" isLoading={isLoading}>
                 Envoyer le lien de réinitialisation
-              </button>
+              </LoadingButton>
             </div>
           </form>
         </div>

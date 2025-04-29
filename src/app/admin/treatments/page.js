@@ -5,6 +5,7 @@ import { Plus, Sparkles } from 'lucide-react';
 import { TreatmentForm } from '../../../components/forms/TreatmentForm';
 import { DropdownMenu } from '../../../components/ui/DropdownMenu';
 import { useTreatments } from '@/hooks/useTreatments';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export default function AdminTreatments() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -115,67 +116,78 @@ export default function AdminTreatments() {
         </button>
       </div>
 
-      <div className="grid gap-6">
-        {treatments?.map((treatment) => (
-          <div key={treatment.id} className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-primary" />
+      {treatments && treatments.length > 0 ? (
+        <div className="grid gap-6">
+          {treatments.map((treatment) => (
+            <div key={treatment.id} className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-primary">{treatment.name}</h3>
+                    <p className="text-sm text-gray-500">{treatment.category}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-medium">{treatment.name}</h3>
-                  <p className="text-sm text-gray-500">{treatment.category}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className={`
-                  inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                  ${treatment.status === 'active'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-800'
-                  }
-                `}>
-                  {treatment.status === 'active' ? 'Actif' : 'Inactif'}
-                </span>
-                <DropdownMenu
-                  items={[
-                    {
-                      label: 'Modifier',
-                      onClick: () => handleEdit(treatment)
-                    },
-                    {
-                      label: 'Supprimer',
-                      onClick: () => handleDelete(treatment.id),
-                      destructive: true
+                <div className="flex items-center space-x-3">
+                  <span className={`
+                    inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                    ${treatment.status === 'active'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
                     }
-                  ]}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4">
-              <p className="text-gray-600">{treatment.description}</p>
-
-              <div className="flex flex-wrap gap-6">
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Prix:</span>
-                  <span className="ml-2 text-lg font-semibold text-primary">
-                    {formatPrice(treatment.price)}
+                  `}>
+                    {treatment.status === 'active' ? 'Actif' : 'Inactif'}
                   </span>
+                  <DropdownMenu
+                    items={[
+                      {
+                        label: 'Modifier',
+                        onClick: () => handleEdit(treatment)
+                      },
+                      {
+                        label: 'Supprimer',
+                        onClick: () => handleDelete(treatment.id),
+                        destructive: true
+                      }
+                    ]}
+                  />
                 </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Durée:</span>
-                  <span className="ml-2">{treatment.duration} minutes</span>
-                </div>
-
               </div>
 
+              <div className="grid gap-4">
+                <p className="text-gray-600">{treatment.description}</p>
 
+                <div className="flex flex-wrap gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Prix:</span>
+                    <span className="ml-2 text-lg font-semibold text-primary">
+                      {formatPrice(treatment.price)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Durée:</span>
+                    <span className="ml-2">{treatment.duration} minutes</span>
+                  </div>
+
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          icon={Sparkles}
+          title="Aucun traitement"
+          description="Il n'y a actuellement aucun traitement dans le catalogue. Vous pouvez ajouter un nouveau traitement en cliquant sur le bouton ci-dessous."
+          actionLabel="Nouveau traitement"
+          onAction={() => {
+            setEditingTreatment(null);
+            setIsFormOpen(true);
+          }}
+        />
+      )}
 
       <TreatmentForm
         isOpen={isFormOpen}

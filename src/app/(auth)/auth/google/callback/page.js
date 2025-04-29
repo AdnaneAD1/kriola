@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/auth'
 
 export default function GoogleCallback() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const { handleGoogleCallback } = useAuth({
     middleware: 'guest',
     redirectIfAuthenticated: '/dashboard',
@@ -21,7 +22,7 @@ export default function GoogleCallback() {
         }
       })()
     }
-  }, [searchParams])
+  }, [searchParams, handleGoogleCallback, router])
 
   return (
     <Suspense fallback={<div>Chargement...</div>}>

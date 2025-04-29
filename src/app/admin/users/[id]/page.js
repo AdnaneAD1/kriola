@@ -48,7 +48,7 @@ export default function UserDetails() {
             </span>
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-semibold">{user?.name}</h2>
+            <h2 className="text-xl font-semibold text-primary">{user?.name}</h2>
             <div className="mt-4 space-y-2">
               <div className="flex items-center text-gray-600">
                 <Mail className="w-5 h-5 mr-2" />
@@ -81,7 +81,7 @@ export default function UserDetails() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Appointments */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 text-primary">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <Calendar className="w-5 h-5" />
               Rendez-vous
@@ -133,7 +133,7 @@ export default function UserDetails() {
 
         {/* Diagnoses */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 text-primary">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <FileText className="w-5 h-5" />
               Diagnostiques
@@ -226,7 +226,7 @@ export default function UserDetails() {
 
         {/* Programs */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 text-primary">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <Activity className="w-5 h-5" />
               Programmes

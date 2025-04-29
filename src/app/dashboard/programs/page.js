@@ -4,6 +4,7 @@ import { Package, Calendar, Clock, CheckCircle2, CircleDot } from 'lucide-react'
 import { usePrograms } from '@/hooks/usePrograms'
 import { useAuth } from '@/hooks/auth'
 import { useEffect } from 'react'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 export default function Programs() {
   const { user } = useAuth()
@@ -91,9 +92,11 @@ export default function Programs() {
             </div>
           ))}
           {programs?.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              Vous n'avez aucun programme actif pour le moment.
-            </div>
+            <EmptyState
+              icon={Package}
+              title="Aucun programme"
+              description="Vous n'avez aucun programme de traitement actif pour le moment. Vos programmes personnalisés apparaîtront ici après votre consultation."
+            />
           )}
         </div>
       )}

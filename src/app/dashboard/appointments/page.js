@@ -4,6 +4,7 @@ import { Calendar, Clock, RefreshCw, Check, Clock4, X, Plus } from 'lucide-react
 import Script from 'next/script';
 import { useAppointments } from '../../../hooks/useAppointments';
 import { useState, useEffect } from 'react';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export default function Appointments() {
   const { appointments, isLoading, error, updateAppointmentStatus } = useAppointments();
@@ -147,7 +148,7 @@ export default function Appointments() {
         )}
       </div>
 
-      {appointments.length > 0 && (
+      {appointments.length > 0 ? (
         <div className="bg-white rounded-xl shadow-sm">
           <h2 className="text-xl font-semibold p-6 border-b">Rendez-vous prévus</h2>
           <div className="grid divide-y">
@@ -211,6 +212,14 @@ export default function Appointments() {
             ))}
           </div>
         </div>
+      ) : (
+        <EmptyState
+          icon={Calendar}
+          title="Aucun rendez-vous"
+          description="Vous n'avez pas encore de rendez-vous prévu. Cliquez sur le bouton ci-dessous pour ouvrir le calendrier et prendre un rendez-vous."
+          actionLabel="Prendre un rendez-vous"
+          onAction={() => setShowCalendly(true)}
+        />
       )}
     </div>
   );

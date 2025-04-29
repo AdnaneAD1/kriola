@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { User, Mail, Lock, Phone, UserPlus } from 'lucide-react';
-import { Logo } from '../../../components/ui/Logo';
+import { AuthLogo } from '../../../components/ui/AuthLogo';
 import { useAuth } from '@/hooks/auth';
 import AuthSessionStatus from '@/app/(auth)/AuthSessionStatus';
 import { LoadingButton } from '@/components/ui/LoadingButton';
@@ -80,7 +80,7 @@ export default function Register() {
       await register({ setErrors, ...registerData });
       setStatus('Votre compte a été créé avec succès!');
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('Erreur d\'inscription:', error);
       setStatus('Une erreur est survenue lors de l\'inscription.');
     } finally {
       setIsLoading(false);
@@ -101,7 +101,7 @@ export default function Register() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <Link href="/" className="inline-block">
-            <Logo />
+            <AuthLogo />
           </Link>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
