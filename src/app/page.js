@@ -20,39 +20,38 @@ export default function Home() {
             <div className="lg:w-1/2 space-y-8">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full hover:bg-primary/20 transition-all cursor-pointer group">
                 <Sparkles className="w-4 h-4 animate-pulse" />
-                <span className="text-sm font-medium">Découvrez la révolution des soins de la peau</span>
+                <span className="text-sm font-medium">Votre soin ne s'arrête pas à la clinique. Suivez-le ici.</span>
               </div>
-              
+
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
-                Transformez Votre Peau avec{' '}
                 <span className="gradient-text bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">
-                  KriolaCare
+                  KriolaCare: {' '}
                 </span>
+                Votre Journal de Beauté Connecté
               </h1>
-              
+
               <p className="text-lg text-gray-600">
-                Notre technologie plasma avancée offre des traitements personnalisés pour une peau radieuse et saine.
-                Scientifiquement prouvé, naturellement efficace.
+                KriolaCare vous accompagne à chaque étape de votre soin plasma. Historique, recommandations, résultats : tout est à portée de main.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link 
-                  href="/dashboard" 
+                <Link
+                  href="/dashboard"
                   className="btn-primary group flex items-center justify-center px-8 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg"
                 >
-                  Réserver une Consultation
+                  Suivre mon Traitement
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                
-                <Link 
-                  href="/about" 
+
+                <Link
+                  href="/about"
                   className="flex items-center justify-center px-8 py-3 rounded-lg font-medium border border-gray-300 hover:border-primary transition-all duration-300"
                 >
                   <Play className="w-4 h-4 mr-2 text-primary" />
                   Voir la démo
                 </Link>
               </div>
-              
+
               {/* Trust badges - Nouvel élément */}
               <div className="flex flex-wrap items-center gap-4 pt-8">
                 <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -65,18 +64,18 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            
+
             {/* Image - Redimensionnée et mieux intégrée */}
             <div className="lg:w-1/2 relative mt-10 lg:mt-0">
               <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-square max-w-md mx-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent z-10"></div>
-                <img 
+                <img
                   src="https://studiokanea.fr/wp-content/uploads/2024/10/DALL%C2%B7E-2024-10-25-09.50.52-An-extreme-close-up-of-a-beauty-salon-facial-treatment-using-Russian-cold-plasma-therapy-on-a-client.-The-camera-angle-is-at-a-45-degree-angle-from-th-copie.jpg"
                   alt="Traitement KriolaCare"
                   className="w-full h-full object-cover transition-all duration-500 hover:scale-105"
                 />
               </div>
-              
+
               {/* Floating card - Nouvel élément design */}
               <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg border border-gray-100">
                 <div className="flex items-center gap-3">
@@ -104,7 +103,7 @@ export default function Home() {
                 Notre méthode combine technologie de pointe et expertise dermatologique pour des résultats inégalés.
               </p>
             </div>
-            
+
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 {
@@ -123,7 +122,7 @@ export default function Home() {
                   description: "Support professionnel tout au long de votre parcours de soins de la peau."
                 }
               ].map((feature, index) => (
-                <div 
+                <div
                   key={index}
                   className="bg-white p-8 rounded-xl border border-gray-100 hover:border-primary/30 transition-all duration-300 hover:shadow-lg group"
                 >
@@ -138,7 +137,7 @@ export default function Home() {
           </div>
         </section>
 
-        
+
       </main>
     </PublicLayout>
   );
