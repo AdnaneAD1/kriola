@@ -56,7 +56,7 @@ export default function Home() {
               <div className="flex flex-wrap items-center gap-4 pt-8">
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Users className="w-4 h-4" />
-                  <span>+5,000 clients satisfaits</span>
+                  <span>+45 clients satisfaits</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Award className="w-4 h-4" />
