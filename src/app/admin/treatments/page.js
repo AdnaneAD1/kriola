@@ -12,6 +12,8 @@ export default function AdminTreatments() {
   const [editingTreatment, setEditingTreatment] = useState(null);
   const { treatments, loading, error, deleteTreatment, subscribeToTreatments, toggleTreatmentStatus } = useTreatments();
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   // Abonnement temps réel aux traitements avec recherche
   useEffect(() => {
@@ -24,6 +26,11 @@ export default function AdminTreatments() {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
   }, [subscribeToTreatments, search]);
+
+  // Reset pagination when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   if (loading) {
     return (
@@ -111,33 +118,39 @@ export default function AdminTreatments() {
     }).format(price);
   };
 
+  const totalItems = (treatments || []).length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const paginatedTreatments = (treatments || []).slice(startIndex, startIndex + pageSize);
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gestion des traitements</h1>
-        <div className="flex items-center gap-3">
+      <div className="mb-6 flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
+        <h1 className="text-2xl font-bold whitespace-nowrap">Gestion des traitements</h1>
+        <div className="w-full md:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher..."
-            className="input"
+            className="input w-full sm:w-64"
           />
-        <button
-          onClick={() => {
-            setEditingTreatment(null);
-            setIsFormOpen(true);
-          }}
-          className="btn-primary"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Nouveau traitement
-        </button>
+          <button
+            onClick={() => {
+              setEditingTreatment(null);
+              setIsFormOpen(true);
+            }}
+            className="btn-primary w-full sm:w-auto"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Nouveau traitement
+          </button>
         </div>
       </div>
 
       {treatments && treatments.length > 0 ? (
         <div className="grid gap-6">
-          {treatments.map((treatment) => (
+          {paginatedTreatments.map((treatment) => (
             <div key={treatment.id} className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
@@ -198,6 +211,23 @@ export default function AdminTreatments() {
               </div>
             </div>
           ))}
+          <div className="flex items-center justify-between mt-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="px-3 py-2 rounded-md border border-gray-300 text-sm disabled:opacity-50"
+            >
+              Précédent
+            </button>
+            <span className="text-sm text-gray-600">Page {safePage} sur {totalPages}</span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className="px-3 py-2 rounded-md border border-gray-300 text-sm disabled:opacity-50"
+            >
+              Suivant
+            </button>
+          </div>
         </div>
       ) : (
         <EmptyState

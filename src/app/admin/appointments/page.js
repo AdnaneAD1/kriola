@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, Clock, Plus, User } from 'lucide-react';
 import { AdminAppointmentForm } from '../../../components/forms/AdminAppointmentForm';
 import { DropdownMenu } from '../../../components/ui/DropdownMenu';
@@ -23,6 +23,13 @@ export default function AdminAppointments() {
   const [sortOrder, setSortOrder] = useState('desc'); // 'desc' = du plus récent au plus ancien
   const [dateFrom, setDateFrom] = useState(''); // YYYY-MM-DD
   const [dateTo, setDateTo] = useState('');   // YYYY-MM-DD
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
+
+  // Reset page when filters or underlying list change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, sortOrder, dateFrom, dateTo, appointments?.length]);
 
   if (isLoading) {
     return (
@@ -93,6 +100,13 @@ export default function AdminAppointments() {
       return sortOrder === 'desc' ? db - da : da - db;
     });
 
+  // Pagination derived values
+  const totalItems = displayedAppointments.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const paginatedAppointments = displayedAppointments.slice(startIndex, startIndex + pageSize);
+
   const handleEdit = (appointment) => {
     setEditingAppointment(appointment);
     setIsFormOpen(true);
@@ -153,18 +167,20 @@ export default function AdminAppointments() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-primary">Gestion des rendez-vous</h1>
-        <button
-          onClick={() => {
-            setEditingAppointment(null);
-            setIsFormOpen(true);
-          }}
-          className="btn-primary"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Nouveau rendez-vous
-        </button>
+      <div className="mb-6 flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
+        <h1 className="text-2xl font-bold text-primary whitespace-nowrap">Gestion des rendez-vous</h1>
+        <div className="w-full md:w-auto">
+          <button
+            onClick={() => {
+              setEditingAppointment(null);
+              setIsFormOpen(true);
+            }}
+            className="btn-primary w-full sm:w-auto"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Nouveau rendez-vous
+          </button>
+        </div>
       </div>
 
       {/* Filtres et tri */}
@@ -218,7 +234,7 @@ export default function AdminAppointments() {
       {displayedAppointments.length > 0 ? (
         <div className="bg-white rounded-xl shadow-sm">
           <div className="grid divide-y">
-            {displayedAppointments.map((appointment) => (
+            {paginatedAppointments.map((appointment) => (
               <div
                 key={appointment.id}
                 className="p-4 cursor-pointer hover:bg-gray-50"
@@ -285,6 +301,23 @@ export default function AdminAppointments() {
                 </div>
               </div>
             ))}
+          </div>
+          <div className="flex items-center justify-between px-4 py-3 border-t">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="px-3 py-2 rounded-md border border-gray-300 text-sm disabled:opacity-50"
+            >
+              Précédent
+            </button>
+            <span className="text-sm text-gray-600">Page {safePage} sur {totalPages}</span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className="px-3 py-2 rounded-md border border-gray-300 text-sm disabled:opacity-50"
+            >
+              Suivant
+            </button>
           </div>
         </div>
       ) : (

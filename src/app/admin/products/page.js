@@ -13,6 +13,8 @@ export default function AdminProducts() {
 
   const { products, error, deleteProduct, loading, subscribeToProducts } = useProducts();
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   // Abonnement temps réel aux produits avec recherche
   useEffect(() => {
@@ -26,6 +28,11 @@ export default function AdminProducts() {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
   }, [subscribeToProducts, search]);
+
+  // Reset pagination when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   if (loading) {
     return (
@@ -85,33 +92,39 @@ export default function AdminProducts() {
     }).format(price);
   };
 
+  const totalItems = (products || []).length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const paginatedProducts = (products || []).slice(startIndex, startIndex + pageSize);
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gestion des produits</h1>
-        <div className="flex items-center gap-3">
+      <div className="mb-6 flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
+        <h1 className="text-2xl font-bold whitespace-nowrap">Gestion des produits</h1>
+        <div className="w-full md:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher..."
-            className="input"
+            className="input w-full sm:w-64"
           />
-        <button
-          onClick={() => {
-            setEditingProduct(null);
-            setIsFormOpen(true);
-          }}
-          className="btn-primary"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Nouveau produit
-        </button>
+          <button
+            onClick={() => {
+              setEditingProduct(null);
+              setIsFormOpen(true);
+            }}
+            className="btn-primary w-full sm:w-auto"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Nouveau produit
+          </button>
         </div>
       </div>
 
       {(products || []).length > 0 ? (
         <div className="grid gap-6">
-          {(products || []).map((product) => (
+          {paginatedProducts.map((product) => (
             <div key={product.id} className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
@@ -152,6 +165,23 @@ export default function AdminProducts() {
               </div>
             </div>
           ))}
+          <div className="flex items-center justify-between mt-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="px-3 py-2 rounded-md border border-gray-300 text-sm disabled:opacity-50"
+            >
+              Précédent
+            </button>
+            <span className="text-sm text-gray-600">Page {safePage} sur {totalPages}</span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className="px-3 py-2 rounded-md border border-gray-300 text-sm disabled:opacity-50"
+            >
+              Suivant
+            </button>
+          </div>
         </div>
       ) : (
         <EmptyState

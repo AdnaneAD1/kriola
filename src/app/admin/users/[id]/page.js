@@ -87,7 +87,7 @@ export default function UserDetails() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4 sm:px-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-2xl font-bold">Détails de l&apos;utilisateur</h1>
@@ -111,7 +111,7 @@ export default function UserDetails() {
 
       {/* User Info Card */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-start gap-4">
+        <div className="flex flex-wrap items-start gap-4">
           <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center">
             <span className="text-primary text-xl font-medium">
               {user?.name?.charAt(0).toUpperCase()}
@@ -120,17 +120,17 @@ export default function UserDetails() {
           <div className="flex-1">
             <h2 className="text-xl font-semibold text-primary">{user?.name}</h2>
             <div className="mt-4 space-y-2">
-              <div className="flex items-center text-gray-600">
+              <div className="flex items-center text-gray-600 min-w-0 break-words">
                 <Mail className="w-5 h-5 mr-2" />
                 {user?.email}
               </div>
               {user?.phone && (
-                <div className="flex items-center text-gray-600">
+                <div className="flex items-center text-gray-600 min-w-0 break-words">
                   <Phone className="w-5 h-5 mr-2" />
                   {user?.phone}
                 </div>
               )}
-              <div className="flex items-center text-gray-600">
+              <div className="flex items-center text-gray-600 min-w-0 break-words">
                 <Calendar className="w-5 h-5 mr-2" />
                 {(() => {
                   const created = user?.createdAt || user?.created_at;
@@ -156,7 +156,7 @@ export default function UserDetails() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Appointments */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4 text-primary">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4 text-primary">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <Calendar className="w-5 h-5" />
               Rendez-vous
@@ -207,7 +207,7 @@ export default function UserDetails() {
 
         {/* Diagnoses */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4 text-primary">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4 text-primary">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <FileText className="w-5 h-5" />
               Diagnostiques
@@ -299,18 +299,18 @@ export default function UserDetails() {
 
         {/* Programs */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4 text-primary">
+          <div className="text-primary mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <Activity className="w-5 h-5" />
               Programmes
             </h3>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
                 onClick={() => {
                   setEditingProgram(null);
                   setIsProgramFormOpen(true);
                 }}
-                className="btn-primary"
+                className="btn-primary w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Nouveau programme
@@ -352,7 +352,7 @@ export default function UserDetails() {
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 mt-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
                   <div>
                     <h5 className="text-sm font-medium mb-2">Traitements</h5>
                     <ul className="text-sm text-gray-600 list-disc list-inside">
