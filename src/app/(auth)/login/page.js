@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Mail, Lock } from 'lucide-react'
 import { AuthLogo } from '../../../components/ui/AuthLogo'
@@ -13,6 +13,7 @@ import { useUsers } from '@/hooks/useUsers'
 export default function Login() {
   const router = useRouter()
   const { signIn, currentUser } = useUsers()
+  const submittingRef = useRef(false)
 
   const [formData, setFormData] = useState({
     email: '',
@@ -37,6 +38,8 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (submittingRef.current) return
+    submittingRef.current = true
     setIsLoading(true)
     try {
       setErrors({})
@@ -44,10 +47,22 @@ export default function Login() {
       await signIn(formData.email, formData.password)
       // Redirection gérée par useEffect selon le rôle
       console.log('Connexion réussie')
-    } catch (err) {
-      setStatus(err.message || 'Erreur de connexion')
+    } catch (error) {
+      const code = error?.code
+      let message = 'Erreur de connexion.'
+      if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
+        message = 'Identifiants invalides. Vérifiez votre email et votre mot de passe.'
+      } else if (code === 'auth/user-not-found') {
+        message = "Aucun compte trouvé pour cet email."
+      } else if (code === 'auth/too-many-requests') {
+        message = 'Trop de tentatives. Veuillez réessayer plus tard.'
+      } else if (code === 'auth/network-request-failed') {
+        message = 'Problème réseau. Vérifiez votre connexion et réessayez.'
+      }
+      setStatus(message)
     } finally {
       setIsLoading(false)
+      submittingRef.current = false
     }
   }
 
@@ -129,7 +144,7 @@ export default function Login() {
             </div>
 
             <div>
-              <LoadingButton type="submit" className="w-full" isLoading={isLoading}>
+              <LoadingButton type="submit" className="w-full" isLoading={isLoading} disabled={isLoading}>
                 Se connecter
               </LoadingButton>
             </div>

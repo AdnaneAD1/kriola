@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, RefreshCw, LogOut } from 'lucide-react'
 import { AuthLogo } from '../../../components/ui/AuthLogo'
@@ -18,15 +18,28 @@ export default function VerifyEmail() {
   const [status, setStatus] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const resendingRef = useRef(false)
 
   const resendEmail = async () => {
+    if (resendingRef.current) return
+    resendingRef.current = true
     setIsLoading(true)
     
     try {
       await resendVerificationEmail()
       setStatus("Email de vérification renvoyé. Veuillez vérifier votre boîte mail.")
+    } catch (error) {
+      const code = error?.code
+      if (code === 'auth/too-many-requests') {
+        setStatus('Trop de tentatives. Veuillez réessayer plus tard.')
+      } else if (code === 'auth/network-request-failed') {
+        setStatus('Problème réseau. Vérifiez votre connexion et réessayez.')
+      } else {
+        setStatus("Impossible d'envoyer l'email de vérification. Réessayez plus tard.")
+      }
     } finally {
       setIsLoading(false)
+      resendingRef.current = false
     }
   }
 
@@ -92,6 +105,7 @@ export default function VerifyEmail() {
               type="button"
               className="w-full flex justify-center items-center"
               isLoading={isLoading}
+              disabled={isLoading}
             >
               {!isLoading && <RefreshCw className="w-5 h-5 mr-2" />}
               Renvoyer l&apos;email de vérification
@@ -102,6 +116,7 @@ export default function VerifyEmail() {
               type="button"
               className="btn-outline w-full flex justify-center items-center"
               isLoading={isLoggingOut}
+              disabled={isLoggingOut}
             >
               {!isLoggingOut && <LogOut className="w-5 h-5 mr-2" />}
               Se déconnecter

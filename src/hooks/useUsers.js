@@ -126,8 +126,13 @@ export const useUsers = () => {
         };
         await sendEmailVerification(fbUser, actionCodeSettings);
       } catch (e) {
-        // Si window n'est pas disponible (SSR), retenter sans settings
-        await sendEmailVerification(fbUser);
+        // Si window n'est pas disponible (SSR) ou autre erreur,
+        // ne pas réessayer si Firebase renvoie un rate-limit
+        if (e?.code !== 'auth/too-many-requests') {
+          await sendEmailVerification(fbUser);
+        } else {
+          console.warn('sendEmailVerification rate-limited, skipping retry');
+        }
       }
 
       const userId = await createUser({
@@ -143,7 +148,10 @@ export const useUsers = () => {
     } catch (err) {
       const errorMessage = err?.message || "Erreur lors de la création de l'utilisateur avec authentification";
       setError(errorMessage);
-      throw new Error(errorMessage);
+      // Préserver le code d'erreur Firebase si disponible
+      const wrapped = new Error(errorMessage);
+      if (err && err.code) wrapped.code = err.code;
+      throw wrapped;
     } finally {
       setLoading(false);
     }

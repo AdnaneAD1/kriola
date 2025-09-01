@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { Mail } from 'lucide-react'
 import { AuthLogo } from '../../../components/ui/AuthLogo'
@@ -17,9 +17,12 @@ export default function ForgotPassword() {
   const [errors, setErrors] = useState([])
   const [status, setStatus] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const submittingRef = useRef(false)
 
   const submitForm = async (e) => {
     e.preventDefault()
+    if (submittingRef.current) return
+    submittingRef.current = true
     setIsLoading(true)
     
     try {
@@ -27,8 +30,20 @@ export default function ForgotPassword() {
       setStatus(null)
       await sendPasswordReset(email)
       setStatus("Un email de réinitialisation a été envoyé s'il existe pour cette adresse.")
+    } catch (error) {
+      const code = error?.code
+      if (code === 'auth/invalid-email') {
+        setErrors({ email: ["Adresse email invalide"] })
+      } else if (code === 'auth/too-many-requests') {
+        setStatus('Trop de tentatives depuis ce dispositif ou réseau. Veuillez réessayer plus tard.')
+      } else if (code === 'auth/network-request-failed') {
+        setStatus('Problème réseau. Vérifiez votre connexion et réessayez.')
+      } else {
+        setStatus("Une erreur est survenue. Veuillez réessayer plus tard.")
+      }
     } finally {
       setIsLoading(false)
+      submittingRef.current = false
     }
   }
 
@@ -84,7 +99,7 @@ export default function ForgotPassword() {
             </div>
 
             <div>
-              <LoadingButton type="submit" className="w-full" isLoading={isLoading}>
+              <LoadingButton type="submit" className="w-full" isLoading={isLoading} disabled={isLoading}>
                 Envoyer le lien de réinitialisation
               </LoadingButton>
             </div>

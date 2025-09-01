@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { Lock } from 'lucide-react'
 import { AuthLogo } from '../../../../components/ui/AuthLogo'
@@ -22,9 +22,12 @@ export default function PasswordReset({ params }) {
   const [errors, setErrors] = useState([])
   const [status, setStatus] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const submittingRef = useRef(false)
 
   const submitForm = async (e) => {
     e.preventDefault()
+    if (submittingRef.current) return
+    submittingRef.current = true
     setIsLoading(true)
     
     try {
@@ -37,8 +40,20 @@ export default function PasswordReset({ params }) {
       const oobCode = searchParams.get('oobCode') || params.token
       await confirmResetPassword(oobCode, formData.password)
       setStatus('Mot de passe réinitialisé avec succès. Vous pouvez vous connecter.')
+    } catch (error) {
+      const code = error?.code
+      if (code === 'auth/weak-password') {
+        setErrors({ password: ['Mot de passe trop faible (minimum 6 caractères).'] })
+      } else if (code === 'auth/expired-action-code' || code === 'auth/invalid-action-code') {
+        setStatus("Le lien de réinitialisation est invalide ou expiré. Demandez un nouveau lien.")
+      } else if (code === 'auth/network-request-failed') {
+        setStatus('Problème réseau. Vérifiez votre connexion et réessayez.')
+      } else {
+        setStatus("Une erreur est survenue. Veuillez réessayer plus tard.")
+      }
     } finally {
       setIsLoading(false)
+      submittingRef.current = false
     }
   }
 
@@ -110,7 +125,7 @@ export default function PasswordReset({ params }) {
             </div>
 
             <div>
-              <LoadingButton type="submit" className="w-full" isLoading={isLoading}>
+              <LoadingButton type="submit" className="w-full" isLoading={isLoading} disabled={isLoading}>
                 Réinitialiser le mot de passe
               </LoadingButton>
             </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { User, Mail, Lock, Phone, UserPlus } from 'lucide-react';
 import { AuthLogo } from '../../../components/ui/AuthLogo';
@@ -10,6 +10,7 @@ import { LoadingButton } from '@/components/ui/LoadingButton';
 import { useUsers } from '@/hooks/useUsers';
 
 export default function Register() {
+  const submittingRef = useRef(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -29,6 +30,8 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setErrors({});
     setStatus(null);
     setIsLoading(true);
@@ -81,9 +84,19 @@ export default function Register() {
       
     } catch (error) {
       console.error('Erreur d\'inscription:', error);
-      setStatus('Une erreur est survenue lors de l\'inscription.');
+      const code = error?.code;
+      let message = "Une erreur est survenue lors de l'inscription.";
+      if (code === 'auth/too-many-requests') {
+        message = 'Trop de tentatives depuis ce dispositif ou réseau. Veuillez réessayer plus tard (quelques minutes).';
+      } else if (code === 'auth/email-already-in-use') {
+        message = "Cet email est déjà utilisé. Essayez de vous connecter ou réinitialiser votre mot de passe.";
+      } else if (code === 'auth/network-request-failed') {
+        message = 'Problème réseau. Vérifiez votre connexion et réessayez.';
+      }
+      setErrors({ general: message });
     } finally {
       setIsLoading(false);
+      submittingRef.current = false;
     }
   };
 
@@ -277,6 +290,7 @@ export default function Register() {
                 type="submit"
                 className="w-full flex justify-center items-center"
                 isLoading={isLoading}
+                disabled={isLoading}
               >
                 <UserPlus className="w-5 h-5 mr-2" />
                 Créer un compte
