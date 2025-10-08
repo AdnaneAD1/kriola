@@ -185,13 +185,13 @@ export default function AdminAppointments() {
 
       {/* Filtres et tri */}
       <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="min-w-0">
             <label className="block text-sm text-gray-600 mb-1">Statut</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="input"
+              className="input w-full"
             >
               <option value="all">Tous</option>
               <option value="confirmed">Confirmé</option>
@@ -199,30 +199,32 @@ export default function AdminAppointments() {
               <option value="cancelled">Annulé</option>
             </select>
           </div>
-          <div>
+          <div className="min-w-0">
             <label className="block text-sm text-gray-600 mb-1">Du</label>
             <input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="input"
+              className="input w-full min-w-0"
+              style={{ minWidth: '140px', maxWidth: '100%' }}
             />
           </div>
-          <div>
+          <div className="min-w-0">
             <label className="block text-sm text-gray-600 mb-1">Au</label>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="input"
+              className="input w-full min-w-0"
+              style={{ minWidth: '140px', maxWidth: '100%' }}
             />
           </div>
-          <div>
+          <div className="min-w-0">
             <label className="block text-sm text-gray-600 mb-1">Tri par date</label>
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="input"
+              className="input w-full"
             >
               <option value="desc">Du plus récent au plus ancien</option>
               <option value="asc">Du plus ancien au plus récent</option>

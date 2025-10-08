@@ -25,26 +25,14 @@ export default function Users() {
     };
   }, [subscribeToUsers, search]);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const getStatusColor = (emailVerified) => {
+    return emailVerified 
+      ? 'bg-green-100 text-green-800'
+      : 'bg-yellow-100 text-yellow-800';
   };
 
-  const translateStatus = (status) => {
-    switch (status) {
-      case 'active':
-        return 'Actif';
-      case 'inactive':
-        return 'Inactif';
-      default:
-        return status;
-    }
+  const translateStatus = (emailVerified) => {
+    return emailVerified ? 'Email vérifié' : 'Email non vérifié';
   };
 
   if (loading) {
@@ -132,8 +120,8 @@ export default function Users() {
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                      {translateStatus(user.status)}
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(user.emailVerified)}`}>
+                      {translateStatus(user.emailVerified)}
                     </span>
                   </td>
                   <td className="py-4 px-6 text-sm text-gray-600">
@@ -212,8 +200,8 @@ export default function Users() {
               <div className="grid grid-cols-1 gap-3 border-t border-gray-100 pt-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Statut</span>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                    {translateStatus(user.status)}
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(user.emailVerified)}`}>
+                    {translateStatus(user.emailVerified)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
