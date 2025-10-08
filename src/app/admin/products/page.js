@@ -126,7 +126,8 @@ export default function AdminProducts() {
         <div className="grid gap-6">
           {paginatedProducts.map((product) => (
             <div key={product.id} className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-center justify-between mb-4">
+              {/* Header avec titre et dropdown - Mobile */}
+              <div className="flex items-center justify-between mb-4 lg:hidden">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                     <Package className="w-5 h-5 text-primary" />
@@ -151,17 +152,110 @@ export default function AdminProducts() {
                 />
               </div>
 
-              <div className="grid gap-4">
-                <p className="text-gray-600">{product.description}</p>
+              <div className="flex flex-col lg:flex-row gap-6">
+                {/* Contenu principal */}
+                <div className="flex-1">
+                  {/* Header avec titre - Desktop seulement */}
+                  <div className="hidden lg:flex items-center space-x-3 mb-4">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Package className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium">{product.name}</h3>
+                      <p className="text-sm text-gray-500">{product.status ? 'Actif' : 'Inactif'}</p>
+                    </div>
+                  </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-sm font-medium text-gray-700">Posologie:</span>
-                    <span className="ml-2 text-gray-600">
-                      {product.posology}
-                    </span>
+                  <div className="grid gap-4">
+                    <p className="text-gray-600">{product.description}</p>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-gray-700">Posologie:</span>
+                        <span className="ml-2 text-gray-600">
+                          {product.posology}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
+
+                {/* Image du produit - Desktop */}
+                <div className="hidden lg:block lg:w-48 lg:flex-shrink-0">
+                  {product.imageUrl ? (
+                    <div className="relative h-40 w-full">
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-cover rounded-lg border border-gray-200"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div className="hidden w-full h-full bg-gray-100 rounded-lg border border-gray-200 items-center justify-center">
+                        <div className="text-center text-gray-400">
+                          <Package className="w-8 h-8 mx-auto mb-2" />
+                          <p className="text-xs">Image non disponible</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-40 w-full bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <div className="text-center text-gray-400">
+                        <Package className="w-8 h-8 mx-auto mb-2" />
+                        <p className="text-xs">Aucune image</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Dropdown - Desktop seulement */}
+                <div className="hidden lg:flex lg:items-start lg:pt-4">
+                  <DropdownMenu
+                    items={[
+                      {
+                        label: 'Modifier',
+                        onClick: () => handleEdit(product)
+                      },
+                      {
+                        label: 'Supprimer',
+                        onClick: () => handleDelete(product.id),
+                        destructive: true
+                      }
+                    ]}
+                  />
+                </div>
+              </div>
+
+              {/* Image du produit - Mobile */}
+              <div className="mt-4 lg:hidden">
+                {product.imageUrl ? (
+                  <div className="relative h-32 w-full">
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-cover rounded-lg border border-gray-200"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                    <div className="hidden w-full h-full bg-gray-100 rounded-lg border border-gray-200 items-center justify-center">
+                      <div className="text-center text-gray-400">
+                        <Package className="w-8 h-8 mx-auto mb-2" />
+                        <p className="text-xs">Image non disponible</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-32 w-full bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                    <div className="text-center text-gray-400">
+                      <Package className="w-8 h-8 mx-auto mb-2" />
+                      <p className="text-xs">Aucune image</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}

@@ -215,12 +215,12 @@ export default function Appointments() {
     });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4 sm:px-6">
       <h1 className="text-2xl font-bold">Mes rendez-vous</h1>
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="p-6 border-b">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
             <h2 className="text-xl font-semibold">Prendre un rendez-vous</h2>
             <div className="flex gap-2">
               {showCalendly && isCalendlyLoaded && (
@@ -229,7 +229,8 @@ export default function Appointments() {
                   className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  Recharger le calendrier
+                  <span className="hidden sm:inline">Recharger le calendrier</span>
+                  <span className="sm:hidden">Recharger</span>
                 </button>
               )}
             </div>
@@ -237,25 +238,27 @@ export default function Appointments() {
         </div>
         
         {!showCalendly ? (
-          <div className="p-16 flex flex-col items-center justify-center bg-gray-50">
-            <div className="flex gap-4">
+          <div className="p-8 sm:p-16 flex flex-col items-center justify-center bg-gray-50">
+            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
               <button
                 onClick={() => setShowCalendly(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors w-full sm:w-auto"
               >
                 <Calendar className="w-5 h-5" />
-                Calendrier Calendly
+                <span className="hidden sm:inline">Calendrier Calendly</span>
+                <span className="sm:hidden">Calendly</span>
               </button>
               
               <button
                 onClick={() => setShowBookingForm(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors w-full sm:w-auto"
               >
                 <CreditCard className="w-5 h-5" />
-                Réserver avec paiement
+                <span className="hidden sm:inline">Réserver avec paiement</span>
+                <span className="sm:hidden">Réserver</span>
               </button>
             </div>
-            <p className="mt-4 text-sm text-gray-600">
+            <p className="mt-4 text-sm text-gray-600 text-center">
               Choisissez votre méthode de réservation préférée
             </p>
           </div>
@@ -293,7 +296,7 @@ export default function Appointments() {
 
       {/* Filtres et tri */}
       <div className="bg-white rounded-xl shadow-sm p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm text-gray-600 mb-1">Statut</label>
             <select
@@ -352,23 +355,23 @@ export default function Appointments() {
                   setDetailsOpen(true);
                 }}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-center space-x-4 min-w-0 flex-1">
                     <div className="flex flex-col">
                       <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>{formatAppointmentDate(appointment.date)}</span>
+                        <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <span className="text-sm sm:text-base">{formatAppointmentDate(appointment.date)}</span>
                       </div>
                       <div className="flex items-center space-x-2 mt-1">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span>{formatAppointmentTime(appointment.time)}</span>
+                        <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <span className="text-sm sm:text-base">{formatAppointmentTime(appointment.time)}</span>
                       </div>
                     </div>
-                    <div>
-                      <h3 className="font-medium">{appointment.title}</h3>
+                    <div className="min-w-0">
+                      <h3 className="font-medium text-sm sm:text-base truncate">{appointment.title}</h3>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-between sm:justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
                       {translateStatus(appointment.status)}
                     </span>
