@@ -11,19 +11,35 @@ export default function Users() {
   const { users, loading, subscribeToUsers } = useUsers();
   const [activeMenu, setActiveMenu] = useState(null);
   const [search, setSearch] = useState('');
+  
+  // États pour les filtres
+  const [statusFilter, setStatusFilter] = useState('all'); // all | verified | unverified
+  const [sortBy, setSortBy] = useState('name'); // name | date | email
+  const [sortOrder, setSortOrder] = useState('asc'); // asc | desc
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
-  // Subscribe to clients list with search term
+  // Subscribe to clients list
   useEffect(() => {
     const unsubscribe = subscribeToUsers({
       role: 'client',
       orderBy: 'name',
       orderDirection: 'asc',
-      searchTerm: search?.trim() || undefined,
     });
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
-  }, [subscribeToUsers, search]);
+  }, [subscribeToUsers]);
+  
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter, sortBy, sortOrder, dateFrom, dateTo]);
 
   const getStatusColor = (emailVerified) => {
     return emailVerified 
@@ -34,6 +50,82 @@ export default function Users() {
   const translateStatus = (emailVerified) => {
     return emailVerified ? 'Email vérifié' : 'Email non vérifié';
   };
+  
+  // Fonction de filtrage et tri
+  const getFilteredAndSortedUsers = () => {
+    if (!users) return [];
+    
+    let filtered = users.filter(user => {
+      // Filtre par recherche
+      if (search.trim()) {
+        const searchTerm = search.toLowerCase();
+        const matchesName = user.name?.toLowerCase().includes(searchTerm);
+        const matchesEmail = user.email?.toLowerCase().includes(searchTerm);
+        const matchesPhone = user.phone?.toLowerCase().includes(searchTerm);
+        if (!matchesName && !matchesEmail && !matchesPhone) return false;
+      }
+      
+      // Filtre par statut email
+      if (statusFilter === 'verified' && !user.emailVerified) return false;
+      if (statusFilter === 'unverified' && user.emailVerified) return false;
+      
+      // Filtre par date d'inscription
+      const userDate = new Date(user.createdAt || user.created_at);
+      if (dateFrom) {
+        const from = new Date(dateFrom);
+        from.setHours(0, 0, 0, 0);
+        if (userDate < from) return false;
+      }
+      if (dateTo) {
+        const to = new Date(dateTo);
+        to.setHours(23, 59, 59, 999);
+        if (userDate > to) return false;
+      }
+      
+      return true;
+    });
+    
+    // Tri
+    filtered.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.name?.toLowerCase() || '';
+          bValue = b.name?.toLowerCase() || '';
+          break;
+        case 'email':
+          aValue = a.email?.toLowerCase() || '';
+          bValue = b.email?.toLowerCase() || '';
+          break;
+        case 'date':
+          aValue = new Date(a.createdAt || a.created_at).getTime();
+          bValue = new Date(b.createdAt || b.created_at).getTime();
+          break;
+        default:
+          return 0;
+      }
+      
+      if (sortBy === 'date') {
+        return sortOrder === 'desc' ? bValue - aValue : aValue - bValue;
+      } else {
+        if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+      }
+    });
+    
+    return filtered;
+  };
+  
+  const filteredUsers = getFilteredAndSortedUsers();
+  
+  // Pagination
+  const totalItems = filteredUsers.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + pageSize);
 
   if (loading) {
     return (
@@ -50,30 +142,119 @@ export default function Users() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Rechercher un utilisateur..."
-                className="input pl-10 w-full"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Rechercher un utilisateur..."
+                  className="input pl-10 w-full"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button 
+                className={`btn-secondary flex items-center gap-2 rounded-lg px-4 py-2 ${
+                  showFilters ? 'bg-primary text-white' : ''
+                }`}
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className="w-4 h-4" />
+                Filtres
+              </button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button className="btn-secondary flex items-center gap-2">
-              <Filter className="w-4 h-4" />
-              Filtres
-            </button>
-            <button className="btn-secondary">
-              Trier par
-            </button>
-          </div>
         </div>
+        
+        {/* Filtres avancés */}
+        {showFilters && (
+          <div className="border-t border-gray-100 p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Statut email</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="input w-full"
+                >
+                  <option value="all">Tous</option>
+                  <option value="verified">Email vérifié</option>
+                  <option value="unverified">Email non vérifié</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Trier par</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="input w-full"
+                >
+                  <option value="name">Nom</option>
+                  <option value="email">Email</option>
+                  <option value="date">Date d'inscription</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Ordre</label>
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                  className="input w-full"
+                >
+                  <option value="asc">{sortBy === 'date' ? 'Plus ancien' : 'A-Z'}</option>
+                  <option value="desc">{sortBy === 'date' ? 'Plus récent' : 'Z-A'}</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Inscrit du</label>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="input w-full"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Au</label>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="input w-full"
+                />
+              </div>
+              
+              <div className="flex items-end">
+                <button
+                  onClick={() => {
+                    setSearch('');
+                    setStatusFilter('all');
+                    setSortBy('name');
+                    setSortOrder('asc');
+                    setDateFrom('');
+                    setDateTo('');
+                  }}
+                  className="btn-secondary w-full"
+                >
+                  Réinitialiser
+                </button>
+              </div>
+            </div>
+            
+            <div className="mt-4 text-sm text-gray-600">
+              {filteredUsers.length} utilisateur(s) trouvé(s)
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Users Table - Desktop */}
@@ -90,7 +271,7 @@ export default function Users() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {users?.map((user) => (
+              {paginatedUsers?.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
@@ -158,9 +339,34 @@ export default function Users() {
         </div>
       </div>
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="px-3 py-2 rounded-md border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Précédent
+            </button>
+            <span className="text-sm text-gray-600">
+              Page {safePage} sur {totalPages} ({totalItems} utilisateurs)
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className="px-3 py-2 rounded-md border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Suivant
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Users Cards - Mobile */}
       <div className="md:hidden space-y-4">
-        {users?.map((user) => (
+        {paginatedUsers?.map((user) => (
           <div key={user.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">

@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, Plus, User } from 'lucide-react';
+import { Calendar, Clock, Plus, User, List, Grid3X3, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AdminAppointmentForm } from '../../../components/forms/AdminAppointmentForm';
 import { DropdownMenu } from '../../../components/ui/DropdownMenu';
 import { useAppointments } from '@/hooks/useAppointments';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Dialog } from '@/components/ui/Dialog';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isSameMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export default function AdminAppointments() {
@@ -24,7 +24,18 @@ export default function AdminAppointments() {
   const [dateFrom, setDateFrom] = useState(''); // YYYY-MM-DD
   const [dateTo, setDateTo] = useState('');   // YYYY-MM-DD
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
+  const pageSize = 4;
+  
+  // Vue calendrier
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'calendar'
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [calendarDetailsOpen, setCalendarDetailsOpen] = useState(false);
+  const [selectedCalendarAppointment, setSelectedCalendarAppointment] = useState(null);
+  
+  // Modal liste des RDV du jour
+  const [dayAppointmentsOpen, setDayAppointmentsOpen] = useState(false);
+  const [selectedDayAppointments, setSelectedDayAppointments] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
 
   // Reset page when filters or underlying list change
   useEffect(() => {
@@ -106,6 +117,49 @@ export default function AdminAppointments() {
   const safePage = Math.min(currentPage, totalPages);
   const startIndex = (safePage - 1) * pageSize;
   const paginatedAppointments = displayedAppointments.slice(startIndex, startIndex + pageSize);
+  
+  // Fonctions pour le calendrier
+  const getAppointmentsForDate = (date) => {
+    return (appointments || []).filter(appointment => {
+      const appointmentDate = toJsDate(appointment);
+      return appointmentDate && isSameDay(appointmentDate, date);
+    });
+  };
+  
+  const generateCalendarDays = () => {
+    const start = startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 1 });
+    const end = endOfWeek(endOfMonth(currentMonth), { weekStartsOn: 1 });
+    return eachDayOfInterval({ start, end });
+  };
+  
+  const handleAppointmentClick = (appointment) => {
+    setSelectedCalendarAppointment(appointment);
+    setCalendarDetailsOpen(true);
+  };
+  
+  const handleDayClick = (date, dayAppointments) => {
+    if (dayAppointments.length >= 2) {
+      // Trier les RDV par heure
+      const sortedAppointments = [...dayAppointments].sort((a, b) => {
+        const timeA = a.time || '00:00';
+        const timeB = b.time || '00:00';
+        return timeA.localeCompare(timeB);
+      });
+      
+      setSelectedDate(date);
+      setSelectedDayAppointments(sortedAppointments);
+      setDayAppointmentsOpen(true);
+    }
+  };
+  
+  const handleDayCellClick = (date, dayAppointments, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (dayAppointments.length >= 2) {
+      handleDayClick(date, dayAppointments);
+    }
+  };
 
   const handleEdit = (appointment) => {
     setEditingAppointment(appointment);
@@ -167,19 +221,48 @@ export default function AdminAppointments() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-bold text-primary whitespace-nowrap">Gestion des rendez-vous</h1>
-        <div className="w-full md:w-auto">
-          <button
-            onClick={() => {
-              setEditingAppointment(null);
-              setIsFormOpen(true);
-            }}
-            className="btn-primary w-full sm:w-auto"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Nouveau rendez-vous
-          </button>
+      <div className="mb-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-xl sm:text-2xl font-bold text-primary">Gestion des rendez-vous</h1>
+          
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            {/* Basculement vue liste/calendrier */}
+            <div className="flex rounded-lg border border-gray-300 p-1 bg-gray-50">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex-1 sm:flex-initial ${
+                  viewMode === 'list'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                }`}
+              >
+                <List className="w-4 h-4" />
+                <span className="hidden sm:inline">Liste</span>
+              </button>
+              <button
+                onClick={() => setViewMode('calendar')}
+                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex-1 sm:flex-initial ${
+                  viewMode === 'calendar'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                }`}
+              >
+                <Grid3X3 className="w-4 h-4" />
+                <span className="hidden sm:inline">Calendrier</span>
+              </button>
+            </div>
+            
+            <button
+              onClick={() => {
+                setEditingAppointment(null);
+                setIsFormOpen(true);
+              }}
+              className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Nouveau rendez-vous</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -233,7 +316,133 @@ export default function AdminAppointments() {
         </div>
       </div>
 
-      {displayedAppointments.length > 0 ? (
+      {viewMode === 'calendar' ? (
+        /* Vue Calendrier */
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          {/* Header du calendrier */}
+          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 bg-gray-50">
+            <button
+              onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 capitalize">
+              {format(currentMonth, 'MMMM yyyy', { locale: fr })}
+            </h2>
+            <button
+              onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+          </div>
+          
+          {/* Grille du calendrier */}
+          <div className="p-2 sm:p-4">
+            {/* Jours de la semaine */}
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, index) => (
+                <div key={day} className="p-2 text-center text-xs sm:text-sm font-medium text-gray-600">
+                  <span className="hidden sm:inline">{day}</span>
+                  <span className="sm:hidden">{['L', 'M', 'M', 'J', 'V', 'S', 'D'][index]}</span>
+                </div>
+              ))}
+            </div>
+            
+            {/* Jours du mois */}
+            <div className="grid grid-cols-7 gap-1">
+              {generateCalendarDays().map(day => {
+                const dayAppointments = getAppointmentsForDate(day);
+                const isCurrentMonth = isSameMonth(day, currentMonth);
+                const isToday = isSameDay(day, new Date());
+                
+                return (
+                  <div
+                    key={day.toISOString()}
+                    className={`min-h-[80px] sm:min-h-[100px] p-1 sm:p-2 border border-gray-100 rounded-md ${
+                      isCurrentMonth ? 'bg-white' : 'bg-gray-50'
+                    } ${
+                      isToday ? 'ring-2 ring-primary ring-opacity-50 bg-primary/5' : ''
+                    } ${
+                      dayAppointments.length >= 2 ? 'cursor-pointer hover:bg-blue-50 hover:border-blue-200' : ''
+                    }`}
+                    onClick={(e) => dayAppointments.length >= 2 ? handleDayCellClick(day, dayAppointments, e) : null}
+                  >
+                    <div className={`text-xs sm:text-sm font-medium mb-1 text-center sm:text-left ${
+                      isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
+                    } ${
+                      isToday ? 'text-primary font-bold' : ''
+                    }`}>
+                      {format(day, 'd')}
+                    </div>
+                    
+                    {/* Rendez-vous du jour */}
+                    <div className="space-y-1">
+                      {dayAppointments.length >= 2 ? (
+                        // Si 2 RDV ou plus, afficher seulement le premier + indicateur
+                        <>
+                          <div
+                            key={dayAppointments[0].id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAppointmentClick(dayAppointments[0]);
+                            }}
+                            className={`text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity ${
+                              dayAppointments[0].status === 'confirmed'
+                                ? 'bg-green-100 text-green-800 border border-green-200'
+                                : dayAppointments[0].status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                                  : 'bg-red-100 text-red-800 border border-red-200'
+                            }`}
+                          >
+                            <div className="font-medium truncate">
+                              <span className="hidden sm:inline">{dayAppointments[0].time} - </span>
+                              {dayAppointments[0].title}
+                            </div>
+                            <div className="truncate opacity-75 hidden sm:block">
+                              {dayAppointments[0].user?.name || 'Utilisateur inconnu'}
+                            </div>
+                          </div>
+                          <div className="text-xs text-blue-600 text-center py-1 font-medium">
+                            Cliquer pour voir tous ({dayAppointments.length})
+                          </div>
+                        </>
+                      ) : (
+                        // Si 1 RDV seulement, affichage normal
+                        dayAppointments.map(appointment => (
+                          <div
+                            key={appointment.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAppointmentClick(appointment);
+                            }}
+                            className={`text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity ${
+                              appointment.status === 'confirmed'
+                                ? 'bg-green-100 text-green-800 border border-green-200'
+                                : appointment.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                                  : 'bg-red-100 text-red-800 border border-red-200'
+                            }`}
+                          >
+                            <div className="font-medium truncate">
+                              <span className="hidden sm:inline">{appointment.time} - </span>
+                              {appointment.title}
+                            </div>
+                            <div className="truncate opacity-75 hidden sm:block">
+                              {appointment.user?.name || 'Utilisateur inconnu'}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : displayedAppointments.length > 0 ? (
         <div className="bg-white rounded-xl shadow-sm">
           <div className="grid divide-y">
             {paginatedAppointments.map((appointment) => (
@@ -390,6 +599,149 @@ export default function AdminAppointments() {
             ) : null}
           </div>
         )}
+      </Dialog>
+      
+      {/* Modal détails calendrier */}
+      <Dialog
+        isOpen={calendarDetailsOpen}
+        onClose={() => setCalendarDetailsOpen(false)}
+        title={selectedCalendarAppointment ? selectedCalendarAppointment.title || 'Détails du rendez-vous' : 'Détails du rendez-vous'}
+      >
+        {selectedCalendarAppointment && (
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <span>{formatAppointmentDate(selectedCalendarAppointment.date)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-gray-400" />
+              <span>{selectedCalendarAppointment.time}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-gray-400" />
+              <span>{selectedCalendarAppointment.user?.name || 'Utilisateur inconnu'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                ${selectedCalendarAppointment.status === 'confirmed'
+                  ? 'bg-green-100 text-green-800'
+                  : selectedCalendarAppointment.status === 'pending'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-red-100 text-red-800'
+                }
+              `}>
+                {selectedCalendarAppointment.status === 'confirmed' ? 'Confirmé' : selectedCalendarAppointment.status === 'pending' ? 'En attente' : 'Annulé'}
+              </span>
+            </div>
+            {selectedCalendarAppointment.duration ? (
+              <div className="text-gray-700">Durée: {selectedCalendarAppointment.duration} min</div>
+            ) : null}
+            {typeof selectedCalendarAppointment.total_price !== 'undefined' ? (
+              <div className="text-gray-700">Prix total: {Number(selectedCalendarAppointment.total_price).toFixed(2)} €</div>
+            ) : null}
+            {selectedCalendarAppointment.notes ? (
+              <div>
+                <div className="text-gray-500">Notes</div>
+                <div className="mt-1 whitespace-pre-wrap">{selectedCalendarAppointment.notes}</div>
+              </div>
+            ) : null}
+            
+            {/* Actions rapides */}
+            <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setCalendarDetailsOpen(false);
+                  handleEdit(selectedCalendarAppointment);
+                }}
+                className="btn-secondary flex-1"
+              >
+                Modifier
+              </button>
+              <button
+                onClick={() => {
+                  setCalendarDetailsOpen(false);
+                  handleCancel(selectedCalendarAppointment.id);
+                }}
+                className="btn-secondary flex-1 text-red-600 hover:bg-red-50"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        )}
+      </Dialog>
+      
+      {/* Modal liste des RDV du jour */}
+      <Dialog
+        isOpen={dayAppointmentsOpen}
+        onClose={() => setDayAppointmentsOpen(false)}
+        title={selectedDate ? `Rendez-vous du ${format(selectedDate, 'dd MMMM yyyy', { locale: fr })}` : 'Rendez-vous du jour'}
+      >
+        <div className="space-y-3">
+          {selectedDayAppointments.map((appointment, index) => (
+            <div
+              key={appointment.id}
+              className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              onClick={() => {
+                setDayAppointmentsOpen(false);
+                handleAppointmentClick(appointment);
+              }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    <span className="font-medium text-gray-900">{appointment.time}</span>
+                  </div>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    appointment.status === 'confirmed'
+                      ? 'bg-green-100 text-green-800'
+                      : appointment.status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                  }`}>
+                    {appointment.status === 'confirmed' ? 'Confirmé' : appointment.status === 'pending' ? 'En attente' : 'Annulé'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="space-y-1">
+                <h4 className="font-medium text-gray-900">{appointment.title}</h4>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <User className="w-4 h-4" />
+                  <span>{appointment.user?.name || 'Utilisateur inconnu'}</span>
+                </div>
+                
+                {appointment.duration && (
+                  <div className="text-sm text-gray-600">
+                    Durée: {appointment.duration} min
+                  </div>
+                )}
+                
+                {appointment.notes && (
+                  <div className="text-sm text-gray-600 mt-2">
+                    <span className="font-medium">Notes:</span> {appointment.notes}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          
+          {selectedDayAppointments.length === 0 && (
+            <div className="text-center text-gray-500 py-8">
+              Aucun rendez-vous pour cette journée
+            </div>
+          )}
+          
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <button
+              onClick={() => setDayAppointmentsOpen(false)}
+              className="w-full btn-secondary"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
       </Dialog>
     </div>
   );
