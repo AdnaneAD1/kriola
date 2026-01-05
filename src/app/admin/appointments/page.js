@@ -42,6 +42,11 @@ export default function AdminAppointments() {
     setCurrentPage(1);
   }, [statusFilter, sortOrder, dateFrom, dateTo, appointments?.length]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">

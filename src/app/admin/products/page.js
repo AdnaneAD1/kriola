@@ -34,6 +34,11 @@ export default function AdminProducts() {
     setCurrentPage(1);
   }, [search]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">

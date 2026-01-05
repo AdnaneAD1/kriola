@@ -41,6 +41,11 @@ export default function Users() {
     setCurrentPage(1);
   }, [search, statusFilter, sortBy, sortOrder, dateFrom, dateTo]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   const getStatusColor = (emailVerified) => {
     return emailVerified 
       ? 'bg-green-100 text-green-800'

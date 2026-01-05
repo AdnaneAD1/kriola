@@ -16,26 +16,28 @@ export function TreatmentForm({ isOpen, onClose, treatment = null }) {
 
 
   useEffect(() => {
-    if (treatment) {
-      // Si on modifie un traitement existant
-      setFormData({
-        name: treatment.name || '',
-        category: treatment.category || '',
-        duration: treatment.duration || '',
-        price: treatment.price ? treatment.price.toString() : '',
-        description: treatment.description || ''
-      });
-    } else {
-      // Si on crée un nouveau traitement
-      setFormData({
-        name: '',
-        category: '',
-        duration: '',
-        price: '',
-        description: ''
-      });
+    if (isOpen) {
+      if (treatment) {
+        // Si on modifie un traitement existant
+        setFormData({
+          name: treatment.name || '',
+          category: treatment.category || '',
+          duration: treatment.duration || '',
+          price: treatment.price ? treatment.price.toString() : '',
+          description: treatment.description || ''
+        });
+      } else {
+        // Si on crée un nouveau traitement - réinitialiser le formulaire
+        setFormData({
+          name: '',
+          category: '',
+          duration: '',
+          price: '',
+          description: ''
+        });
+      }
     }
-  }, [treatment]);
+  }, [treatment, isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
