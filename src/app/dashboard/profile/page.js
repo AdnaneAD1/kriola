@@ -38,7 +38,7 @@ export default function Profile() {
       email: currentUser.email || '',
       first_name: currentUser.first_name || '',
       last_name: currentUser.last_name || '',
-      phone: currentUser.phone || currentUser.phoneNumber || '',
+      phone: currentUser.phoneNumber || '',
     });
   }, [currentUser]);
 

@@ -61,7 +61,7 @@ export default function Users() {
         const searchTerm = search.toLowerCase();
         const matchesName = user.name?.toLowerCase().includes(searchTerm);
         const matchesEmail = user.email?.toLowerCase().includes(searchTerm);
-        const matchesPhone = user.phone?.toLowerCase().includes(searchTerm);
+        const matchesPhone = user.phoneNumber?.toLowerCase().includes(searchTerm);
         if (!matchesName && !matchesEmail && !matchesPhone) return false;
       }
       
@@ -292,10 +292,10 @@ export default function Users() {
                         <Mail className="w-4 h-4 mr-2" />
                         {user.email}
                       </div>
-                      {user.phone && (
-                        <div className="flex items-center text-sm text-gray-600 break-all">
+                      {user.phoneNumber && (
+                        <div className="flex items-center text-sm text-gray-500">
                           <Phone className="w-4 h-4 mr-2" />
-                          {user.phone}
+                          {user.phoneNumber}
                         </div>
                       )}
                     </div>
@@ -423,10 +423,10 @@ export default function Users() {
                   <Mail className="w-4 h-4 mr-2 text-gray-400" />
                   {user.email}
                 </div>
-                {user.phone && (
+                {user.phoneNumber && (
                   <div className="flex items-center text-sm text-gray-600 break-all">
                     <Phone className="w-4 h-4 mr-2 text-gray-400" />
-                    {user.phone}
+                    {user.phoneNumber}
                   </div>
                 )}
               </div>

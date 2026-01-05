@@ -124,10 +124,10 @@ export default function UserDetails() {
                 <Mail className="w-5 h-5 mr-2" />
                 {user?.email}
               </div>
-              {user?.phone && (
+              {user?.phoneNumber && (
                 <div className="flex items-center text-gray-600 min-w-0 break-words">
                   <Phone className="w-5 h-5 mr-2" />
-                  {user?.phone}
+                  {user?.phoneNumber}
                 </div>
               )}
               <div className="flex items-center text-gray-600 min-w-0 break-words">
