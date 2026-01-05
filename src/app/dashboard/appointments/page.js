@@ -10,6 +10,7 @@ import { format, parse } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useUsers } from '@/hooks/useUsers';
 import { Dialog } from '@/components/ui/Dialog';
+import { LoadingPage } from '@/components/ui/LoadingSpinner';
 
 export default function Appointments() {
   const { currentUser } = useUsers();
@@ -151,7 +152,7 @@ export default function Appointments() {
   };
 
   if (isLoading) {
-    return <div>Chargement...</div>;
+    return <LoadingPage />;
   }
 
   if (error) {

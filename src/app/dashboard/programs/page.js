@@ -5,6 +5,7 @@ import { usePrograms } from '@/hooks/usePrograms'
 import { useUsers } from '@/hooks/useUsers'
 import { useEffect } from 'react'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { LoadingPage } from '@/components/ui/LoadingSpinner'
 
 export default function Programs() {
   const { currentUser } = useUsers()
@@ -25,9 +26,7 @@ export default function Programs() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        </div>
+        <LoadingPage />
       ) : error ? (
         <div className="text-red-500">{error}</div>
       ) : programs.length === 0 ? (

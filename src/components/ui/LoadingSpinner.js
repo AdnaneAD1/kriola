@@ -1,7 +1,20 @@
-export function LoadingSpinner({ className = 'w-5 h-5' }) {
+export function LoadingSpinner({ size = 'md', className = '', color = 'primary' }) {
+  const sizeClasses = {
+    sm: 'w-4 h-4',
+    md: 'w-8 h-8',
+    lg: 'w-12 h-12',
+    xl: 'w-16 h-16'
+  };
+
+  const colorClasses = {
+    primary: 'text-primary',
+    white: 'text-white',
+    gray: 'text-gray-600'
+  };
+
   return (
     <svg
-      className={`animate-spin text-white ${className}`}
+      className={`animate-spin ${sizeClasses[size]} ${colorClasses[color]} ${className}`}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -20,5 +33,23 @@ export function LoadingSpinner({ className = 'w-5 h-5' }) {
         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
       ></path>
     </svg>
+  );
+}
+
+export function LoadingPage({ message = 'Chargement...' }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-gray-50">
+      <LoadingSpinner size="lg" color="primary" />
+      <p className="text-gray-600 text-lg animate-pulse">{message}</p>
+    </div>
+  );
+}
+
+export function LoadingSection({ message = 'Chargement...', className = '' }) {
+  return (
+    <div className={`flex flex-col items-center justify-center py-12 gap-4 ${className}`}>
+      <LoadingSpinner size="md" color="primary" />
+      <p className="text-gray-600">{message}</p>
+    </div>
   );
 }

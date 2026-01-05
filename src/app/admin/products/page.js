@@ -6,6 +6,7 @@ import { ProductForm } from '../../../components/forms/ProductForm';
 import { DropdownMenu } from '../../../components/ui/DropdownMenu';
 import { useProducts } from '@/hooks/useProducts';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingPage } from '@/components/ui/LoadingSpinner';
 
 export default function AdminProducts() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -40,11 +41,7 @@ export default function AdminProducts() {
   }, [currentPage]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingPage message="Chargement des produits..." />;
   }
 
   if (error) {

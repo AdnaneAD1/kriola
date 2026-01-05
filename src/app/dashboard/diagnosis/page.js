@@ -7,18 +7,23 @@ import { DropdownMenu } from '../../../components/ui/DropdownMenu';
 import { useDiagnoses } from '@/hooks/useDiagnoses';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useUsers } from '@/hooks/useUsers';
+import { LoadingPage } from '@/components/ui/LoadingSpinner';
 
 export default function Diagnosis() {
   const { currentUser } = useUsers();
   const { diagnoses, loading, error, createDiagnosis, updateDiagnosis, hardDeleteDiagnosis, subscribeToDiagnoses } = useDiagnoses();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingDiagnosis, setEditingDiagnosis] = useState(null);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
     if (!currentUser?.id) return;
     const unsub = subscribeToDiagnoses({ userId: currentUser.id });
+    // Marquer le chargement initial comme terminé après un court délai
+    const timer = setTimeout(() => setInitialLoading(false), 500);
     return () => {
       if (typeof unsub === 'function') unsub();
+      clearTimeout(timer);
     };
   }, [currentUser?.id, subscribeToDiagnoses]);
 
@@ -51,13 +56,13 @@ export default function Diagnosis() {
     }
   };
 
-  // if (isLoading) {
-  //   return <div>Chargement...</div>;
-  // }
+  if (loading || initialLoading) {
+    return <LoadingPage />;
+  }
 
-  // if (error) {
-  //   return <div className="text-red-500">{error}</div>;
-  // }
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
 
   return (
     <div className="px-4 sm:px-6">
@@ -78,13 +83,7 @@ export default function Diagnosis() {
       </div>
 
       <div className="grid gap-6">
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        ) : error ? (
-          <div className="text-red-500">{error}</div>
-        ) : diagnoses.length > 0 ? (
+        {diagnoses.length > 0 ? (
           diagnoses.map((diagnosis) => (
             <div key={diagnosis.id} className="bg-white rounded-xl shadow-sm p-6">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">

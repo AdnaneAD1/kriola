@@ -3,6 +3,7 @@
 import { Bell, Calendar, FileText, MessageCircle } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingPage } from '@/components/ui/LoadingSpinner';
 
 export default function Notifications() {
   const { notifications, loading, error, markAsRead } = useNotifications();
@@ -16,7 +17,7 @@ export default function Notifications() {
   };
 
   if (loading) {
-    return <div className="p-4">Chargement des notifications...</div>;
+    return <LoadingPage />;
   }
 
   if (error) {

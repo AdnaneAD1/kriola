@@ -1,9 +1,7 @@
+import { LoadingPage } from '@/components/ui/LoadingSpinner'
+
 const Loading = () => {
-    return (
-        <div className="flex min-h-screen w-full items-center justify-center bg-gray-100">
-            Loading...
-        </div>
-    )
+    return <LoadingPage />
 }
 
 export default Loading

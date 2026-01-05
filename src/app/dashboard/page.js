@@ -10,6 +10,7 @@ import { useUsers } from '@/hooks/useUsers';
 import { usePrograms } from '@/hooks/usePrograms';
 import { useDiagnoses } from '@/hooks/useDiagnoses';
 import { useAppointments } from '@/hooks/useAppointments';
+import { LoadingPage } from '@/components/ui/LoadingSpinner';
 
 export default function Dashboard() {
   const searchParams = useSearchParams();
@@ -127,6 +128,11 @@ export default function Dashboard() {
   };
 
   const anyError = appointmentsError || programsError || diagnosesError;
+  const isLoading = programsLoading || diagnosesLoading || appointmentsLoading;
+
+  if (isLoading) {
+    return <LoadingPage />;
+  }
 
   return (
     <div className="space-y-6 md:space-y-8">

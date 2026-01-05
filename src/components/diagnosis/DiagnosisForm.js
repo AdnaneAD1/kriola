@@ -174,7 +174,7 @@ export function DiagnosisForm({ onSuccess }) {
         disabled={isLoading}
         className="btn-primary w-full"
       >
-        {isLoading ? <LoadingSpinner /> : 'Envoyer mon diagnostic'}
+        {isLoading ? <LoadingSpinner size="sm" color="white" /> : 'Envoyer mon diagnostic'}
       </button>
     </form>
   );

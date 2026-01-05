@@ -7,6 +7,7 @@ import { DropdownMenu } from '../../../components/ui/DropdownMenu';
 import { useAppointments } from '@/hooks/useAppointments';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Dialog } from '@/components/ui/Dialog';
+import { LoadingPage } from '@/components/ui/LoadingSpinner';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isSameMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -48,11 +49,7 @@ export default function AdminAppointments() {
   }, [currentPage]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Chargement des rendez-vous...</div>
-      </div>
-    );
+    return <LoadingPage message="Chargement des rendez-vous..." />;
   }
 
   if (error) {
