@@ -351,61 +351,69 @@ export default function Appointments() {
             {displayedAppointments.map((appointment) => (
               <div
                 key={appointment.id}
-                className="p-4 cursor-pointer hover:bg-gray-50"
+                className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => {
                   setSelectedAppointment(appointment);
                   setDetailsOpen(true);
                 }}
               >
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex items-center space-x-4 min-w-0 flex-1">
-                    <div className="flex flex-col">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-sm sm:text-base">{formatAppointmentDate(appointment.date)}</span>
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  {/* Colonne 1: Date et Heure */}
+                  <div className="flex items-start gap-4 lg:min-w-[240px]">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                        <span className="text-base font-medium">{formatAppointmentDate(appointment.date)}</span>
                       </div>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-sm sm:text-base">{formatAppointmentTime(appointment.time)}</span>
+                      <div className="flex items-center gap-3 ml-8">
+                        <Clock className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                        <span className="text-base text-gray-600">{formatAppointmentTime(appointment.time)}</span>
                       </div>
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="font-medium text-sm sm:text-base truncate">{appointment.title}</h3>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between sm:justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
+
+                  {/* Colonne 2: Traitement */}
+                  <div className="flex-1 lg:min-w-[200px]">
+                    <h3 className="font-semibold text-base text-gray-900">{appointment.title}</h3>
+                    {appointment.duration && (
+                      <p className="text-sm text-gray-500 mt-1">{appointment.duration} min</p>
+                    )}
+                  </div>
+
+                  {/* Colonne 3: Statut et Actions */}
+                  <div className="flex items-center gap-4 lg:min-w-[280px] lg:justify-end" onClick={(e) => e.stopPropagation()}>
+                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColor(appointment.status)} whitespace-nowrap`}>
                       {translateStatus(appointment.status)}
                     </span>
-                    <div className="flex gap-1">
+                    <div className="flex gap-2">
                       {appointment.status !== 'confirmed' && (
                         <button
                           onClick={() => handleStatusUpdate(appointment.id, 'confirmed')}
                           disabled={updatingId === appointment.id}
-                          className="p-1 text-green-600 hover:bg-green-50 rounded-full"
+                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                           title="Confirmer"
                         >
-                          <Check className="w-4 h-4" />
+                          <Check className="w-5 h-5" />
                         </button>
                       )}
                       {appointment.status !== 'pending' && (
                         <button
                           onClick={() => handleStatusUpdate(appointment.id, 'pending')}
                           disabled={updatingId === appointment.id}
-                          className="p-1 text-yellow-600 hover:bg-yellow-50 rounded-full"
+                          className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
                           title="Mettre en attente"
                         >
-                          <Clock4 className="w-4 h-4" />
+                          <Clock4 className="w-5 h-5" />
                         </button>
                       )}
                       {appointment.status !== 'cancelled' && (
                         <button
                           onClick={() => handleStatusUpdate(appointment.id, 'cancelled')}
                           disabled={updatingId === appointment.id}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded-full"
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Annuler"
                         >
-                          <X className="w-4 h-4" />
+                          <X className="w-5 h-5" />
                         </button>
                       )}
                     </div>

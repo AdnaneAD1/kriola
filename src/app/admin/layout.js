@@ -118,7 +118,7 @@ export default function AdminLayout({ children }) {
   return (
     <div className="h-screen bg-gray-50 overflow-hidden">
       {/* Header Mobile */}
-      <header className="h-20 bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-30 lg:hidden">
+      <header className="h-20 bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-20 lg:hidden">
         <div className="flex items-center justify-between px-4 h-full">
           <Logo />
           <div className="flex items-center gap-4">
@@ -139,7 +139,7 @@ export default function AdminLayout({ children }) {
 
       <div className="flex h-screen">
         {/* Sidebar Desktop */}
-        <aside className="bg-white border-r border-gray-200 w-72 hidden lg:block fixed lg:static h-full z-40 lg:z-auto flex-shrink-0">
+        <aside className="bg-white border-r border-gray-200 w-72 hidden lg:block fixed lg:static h-full z-20 lg:z-auto flex-shrink-0">
           <div className="flex flex-col h-full">
             <div className="h-20 flex items-center px-6 border-b">
               <Logo />
@@ -193,7 +193,7 @@ export default function AdminLayout({ children }) {
         {/* Main Content */}
         <div className="flex-1 flex flex-col lg:ml-0 min-w-0">
           {/* Header Desktop */}
-          <header className="h-20 min-h-[80px] bg-white border-b border-gray-200 hidden lg:flex items-center justify-between px-6 shadow-sm relative z-30 flex-shrink-0">
+          <header className="h-20 min-h-[80px] bg-white border-b border-gray-200 hidden lg:flex items-center justify-between px-6 shadow-sm relative z-10 flex-shrink-0">
             <div className="flex items-center bg-gray-50 py-1.5 px-3 rounded-lg">
               <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                 <User className="w-4 h-4 text-primary" />
@@ -214,7 +214,7 @@ export default function AdminLayout({ children }) {
       </div>
 
       {/* Navigation Mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-200 lg:hidden">
         <div className="flex justify-between px-2">
           {menuItems.filter(item => item.showMobile).map((item) => {
             const active = item.exact 

@@ -448,37 +448,40 @@ export default function AdminAppointments() {
             {paginatedAppointments.map((appointment) => (
               <div
                 key={appointment.id}
-                className="p-4 cursor-pointer hover:bg-gray-50"
+                className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => {
                   setSelectedAppointment(appointment);
                   setDetailsOpen(true);
                 }}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex flex-col">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>{formatAppointmentDate(appointment.date)}</span>
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  {/* Colonne 1: Date et Heure */}
+                  <div className="flex items-start gap-4 lg:min-w-[240px]">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                        <span className="text-base font-medium">{formatAppointmentDate(appointment.date)}</span>
                       </div>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span>{appointment.time}</span>
+                      <div className="flex items-center gap-3 ml-8">
+                        <Clock className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                        <span className="text-base text-gray-600">{appointment.time}</span>
                       </div>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <User className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">
-                          {appointment.user?.name || 'Utilisateur inconnu'}
-                        </span>
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-primary">{appointment.title}</h3>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-4">
+
+                  {/* Colonne 2: Traitement et Client */}
+                  <div className="flex-1 lg:min-w-[280px]">
+                    <h3 className="font-semibold text-base text-primary mb-1">{appointment.title}</h3>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <User className="w-4 h-4 text-gray-400" />
+                      <span>{appointment.user?.name || 'Utilisateur inconnu'}</span>
+                    </div>
+                  </div>
+
+                  {/* Colonne 3: Statut et Actions */}
+                  <div className="flex items-center gap-4 lg:min-w-[200px] lg:justify-end" onClick={(e) => e.stopPropagation()}>
                     <span className={`
-                      inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                      inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap
                       ${appointment.status === 'confirmed'
                         ? 'bg-green-100 text-green-800'
                         : appointment.status === 'pending'
@@ -488,26 +491,24 @@ export default function AdminAppointments() {
                     `}>
                       {appointment.status === 'confirmed' ? 'Confirmé' : appointment.status === 'pending' ? 'En attente' : 'Annulé'}
                     </span>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu
-                        items={[
-                          {
-                            label: 'Modifier',
-                            onClick: () => handleEdit(appointment)
-                          },
-                          {
-                            label: 'Annuler le rendez-vous',
-                            onClick: () => handleCancel(appointment.id),
-                            destructive: true
-                          },
-                          {
-                            label: 'Supprimer',
-                            onClick: () => handleDelete(appointment.id),
-                            destructive: true
-                          }
-                        ]}
-                      />
-                    </div>
+                    <DropdownMenu
+                      items={[
+                        {
+                          label: 'Modifier',
+                          onClick: () => handleEdit(appointment)
+                        },
+                        {
+                          label: 'Annuler le rendez-vous',
+                          onClick: () => handleCancel(appointment.id),
+                          destructive: true
+                        },
+                        {
+                          label: 'Supprimer',
+                          onClick: () => handleDelete(appointment.id),
+                          destructive: true
+                        }
+                      ]}
+                    />
                   </div>
                 </div>
               </div>

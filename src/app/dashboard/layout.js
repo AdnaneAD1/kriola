@@ -99,9 +99,9 @@ export default function DashboardLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Header Mobile */}
-      <header className="h-20 bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-30 lg:hidden">
+      <header className="h-20 bg-white border-b border-gray-200 flex-shrink-0 lg:hidden">
         <div className="flex items-center justify-between px-4 h-full">
           <Logo />
           <div className="flex items-center gap-4">
@@ -115,65 +115,63 @@ export default function DashboardLayout({ children }) {
         </div>
       </header>
 
-      <div className="flex h-screen">
-        {/* Sidebar Desktop */}
-        <aside className="bg-white border-r border-gray-200 w-72 hidden lg:block">
-          <div className="flex flex-col h-full">
-            <div className="h-20 flex items-center px-6 border-b">
-              <Logo />
-            </div>
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar Desktop - Fixed, non scrollable */}
+        <aside className="bg-white border-r border-gray-200 w-72 hidden lg:flex lg:flex-col flex-shrink-0">
+          <div className="h-20 flex items-center px-6 border-b flex-shrink-0">
+            <Logo />
+          </div>
 
-            <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
-              {menuItems.map((item) => {
-                const isActive = pathname === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    href={item.path}
-                    className={`
-                      flex items-center px-4 py-3 text-gray-600 rounded-lg transition-colors
-                      ${isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'hover:bg-primary/5 hover:text-primary'
-                      }
-                    `}
-                  >
-                    <item.icon className={`
-                      w-5 h-5 mr-3
-                      ${isActive ? 'text-primary' : 'text-gray-400 group-hover:text-gray-500'}
-                    `} />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
+          <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
+            {menuItems.map((item) => {
+              const isActive = pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className={`
+                    flex items-center px-4 py-3 text-gray-600 rounded-lg transition-colors
+                    ${isActive
+                      ? 'bg-primary/10 text-primary'
+                      : 'hover:bg-primary/5 hover:text-primary'
+                    }
+                  `}
+                >
+                  <item.icon className={`
+                    w-5 h-5 mr-3
+                    ${isActive ? 'text-primary' : 'text-gray-400 group-hover:text-gray-500'}
+                  `} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
 
-            <div className="p-6 border-t mt-auto">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary" />
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium">{currentUser.name}</p>
-                  <p className="text-xs text-gray-500">Client</p>
-                </div>
+          <div className="p-6 border-t flex-shrink-0">
+            <div className="flex items-center mb-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <User className="w-5 h-5 text-primary" />
               </div>
-              <LoadingButton
-                onClick={handleLogout}
-                isLoading={isLoggingOut}
-                className="flex items-center w-full px-4 py-3 text-white rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
-              >
-                <LogOut className="w-5 h-5 mr-3" />
-                <span>Déconnexion</span>
-              </LoadingButton>
+              <div className="ml-3">
+                <p className="text-sm font-medium">{currentUser.name}</p>
+                <p className="text-xs text-gray-500">Client</p>
+              </div>
             </div>
+            <LoadingButton
+              onClick={handleLogout}
+              isLoading={isLoggingOut}
+              className="flex items-center w-full px-4 py-3 text-white rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
+            >
+              <LogOut className="w-5 h-5 mr-3" />
+              <span>Déconnexion</span>
+            </LoadingButton>
           </div>
         </aside>
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        {/* Main Content - Scrollable */}
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header Desktop */}
-          <header className="h-20 min-h-[80px] bg-white border-b border-gray-200 hidden lg:flex items-center justify-between px-6 shadow-sm">
+          <header className="h-20 min-h-[80px] bg-white border-b border-gray-200 hidden lg:flex items-center justify-between px-6 shadow-sm flex-shrink-0">
             <div className="flex items-center gap-6">
               <Link
                 href="/dashboard/notifications"
@@ -193,17 +191,18 @@ export default function DashboardLayout({ children }) {
             </div>
           </header>
 
-          <main className="flex-1 w-full pt-16 lg:pt-0">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 lg:pb-8">
+          <main className="flex-1 overflow-y-auto pb-24 lg:pb-0">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
               {children}
             </div>
           </main>
         </div>
       </div>
 
-      {/* Navigation Mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 lg:hidden">
-        <div className="grid grid-cols-4 gap-1">
+
+      {/* Navigation Mobile - Fixed at bottom */}
+      <nav className="h-16 bg-white border-t border-gray-200 lg:hidden flex-shrink-0">
+        <div className="grid grid-cols-4 gap-1 h-full">
           {menuItems.filter(item => item.showMobile).map((item) => {
             const isActive = pathname === item.path;
             return (
@@ -211,7 +210,7 @@ export default function DashboardLayout({ children }) {
                 key={item.path}
                 href={item.path}
                 className={`
-                  flex items-center justify-center py-3
+                  flex items-center justify-center
                   ${isActive ? 'text-primary' : 'text-gray-600'}
                   relative
                 `}
