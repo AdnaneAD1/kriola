@@ -194,9 +194,18 @@ export default function Appointments() {
   // Applique filtres et tri
   const displayedAppointments = (appointments || [])
     .filter((a) => {
-      if (statusFilter !== 'all' && a.status !== statusFilter) return false;
+      // Pour le client : ne montrer que les rendez-vous à venir
       const dt = toJsDate(a);
       if (!dt) return false;
+      
+      const now = new Date();
+      // Exclure les rendez-vous passés
+      if (dt < now) return false;
+      // Exclure les rendez-vous complétés
+      if (a.status === 'completed') return false;
+      
+      // Appliquer les filtres de l'interface
+      if (statusFilter !== 'all' && a.status !== statusFilter) return false;
       if (dateFrom) {
         const from = new Date(dateFrom);
         from.setHours(0, 0, 0, 0);

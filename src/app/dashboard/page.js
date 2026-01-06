@@ -85,6 +85,22 @@ export default function Dashboard() {
     });
   }, [appointments, diagnoses]);
 
+  // Filtrer les rendez-vous pour le client : ne montrer que les futurs ou en attente
+  const upcomingAppointmentsForDisplay = useMemo(() => {
+    if (!appointments) return [];
+    const now = new Date();
+    return appointments.filter(a => {
+      // Exclure les rendez-vous complétés
+      if (a.status === 'completed') return false;
+      
+      // Exclure les rendez-vous passés (même s'ils sont confirmés)
+      const appointmentDate = a?.date instanceof Date ? a.date : (a?.date ? new Date(a.date) : null);
+      if (appointmentDate && appointmentDate < now) return false;
+      
+      return true;
+    });
+  }, [appointments]);
+
   // Compute stats when data changes
   // useEffect(() => {
   //   const now = new Date();
@@ -254,12 +270,12 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="divide-y divide-gray-100">
-          {appointments.length === 0 ? (
+          {upcomingAppointmentsForDisplay.length === 0 ? (
             <div className="p-6 text-center text-gray-500">
               Aucun rendez-vous prévu
             </div>
           ) : (
-            appointments.map((appointment) => (
+            upcomingAppointmentsForDisplay.map((appointment) => (
               <div key={appointment.id} className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
