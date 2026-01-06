@@ -37,7 +37,7 @@ export function ProductForm({ isOpen, onClose, product = null }) {
       });
       setPreviewUrl(null);
     }
-  }, [product]);
+  }, [product, isOpen]);
 
   // Nettoyer l'URL objet lorsque le composant est démonté ou que le fichier change
   useEffect(() => {
@@ -67,6 +67,16 @@ export function ProductForm({ isOpen, onClose, product = null }) {
       } else {
         await createProduct(payload);
       }
+      
+      // Réinitialiser le formulaire après la création/modification
+      setFormData({
+        name: '',
+        description: '',
+        posology: '',
+        image: null
+      });
+      setPreviewUrl(null);
+      
       onClose();
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);

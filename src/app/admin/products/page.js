@@ -128,8 +128,8 @@ export default function AdminProducts() {
         <div className="grid gap-6">
           {paginatedProducts.map((product) => (
             <div key={product.id} className="bg-white rounded-xl shadow-sm p-6">
-              {/* Header avec titre et dropdown - Mobile */}
-              <div className="flex items-center justify-between mb-4 lg:hidden">
+              {/* Header avec titre et dropdown */}
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                     <Package className="w-5 h-5 text-primary" />
@@ -154,27 +154,16 @@ export default function AdminProducts() {
                 />
               </div>
 
-              <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex flex-row gap-4 sm:gap-6">
                 {/* Contenu principal */}
                 <div className="flex-1">
-                  {/* Header avec titre - Desktop seulement */}
-                  <div className="hidden lg:flex items-center space-x-3 mb-4">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Package className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium">{product.name}</h3>
-                      <p className="text-sm text-gray-500">{product.status ? 'Actif' : 'Inactif'}</p>
-                    </div>
-                  </div>
-
                   <div className="grid gap-4">
-                    <p className="text-gray-600">{product.description}</p>
+                    <p className="text-gray-600 text-sm sm:text-base">{product.description}</p>
 
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-sm font-medium text-gray-700">Posologie:</span>
-                        <span className="ml-2 text-gray-600">
+                        <span className="ml-2 text-gray-600 text-sm">
                           {product.posology}
                         </span>
                       </div>
@@ -182,10 +171,10 @@ export default function AdminProducts() {
                   </div>
                 </div>
 
-                {/* Image du produit - Desktop */}
-                <div className="hidden lg:block lg:w-48 lg:flex-shrink-0">
+                {/* Image du produit - Toujours visible sur le côté */}
+                <div className="w-24 sm:w-32 lg:w-48 flex-shrink-0">
                   {product.imageUrl ? (
-                    <div className="relative h-40 w-full">
+                    <div className="relative h-24 sm:h-32 lg:h-40 w-full">
                       <img
                         src={product.imageUrl}
                         alt={product.name}
@@ -197,67 +186,20 @@ export default function AdminProducts() {
                       />
                       <div className="hidden w-full h-full bg-gray-100 rounded-lg border border-gray-200 items-center justify-center">
                         <div className="text-center text-gray-400">
-                          <Package className="w-8 h-8 mx-auto mb-2" />
-                          <p className="text-xs">Image non disponible</p>
+                          <Package className="w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-1 sm:mb-2" />
+                          <p className="text-xs hidden sm:block">Image non disponible</p>
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="h-40 w-full bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                    <div className="h-24 sm:h-32 lg:h-40 w-full bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
                       <div className="text-center text-gray-400">
-                        <Package className="w-8 h-8 mx-auto mb-2" />
-                        <p className="text-xs">Aucune image</p>
+                        <Package className="w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-1 sm:mb-2" />
+                        <p className="text-xs hidden sm:block">Aucune image</p>
                       </div>
                     </div>
                   )}
                 </div>
-
-                {/* Dropdown - Desktop seulement */}
-                <div className="hidden lg:flex lg:items-start lg:pt-4">
-                  <DropdownMenu
-                    items={[
-                      {
-                        label: 'Modifier',
-                        onClick: () => handleEdit(product)
-                      },
-                      {
-                        label: 'Supprimer',
-                        onClick: () => handleDelete(product.id),
-                        destructive: true
-                      }
-                    ]}
-                  />
-                </div>
-              </div>
-
-              {/* Image du produit - Mobile */}
-              <div className="mt-4 lg:hidden">
-                {product.imageUrl ? (
-                  <div className="relative h-32 w-full">
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="w-full h-full object-cover rounded-lg border border-gray-200"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.nextSibling.style.display = 'flex';
-                      }}
-                    />
-                    <div className="hidden w-full h-full bg-gray-100 rounded-lg border border-gray-200 items-center justify-center">
-                      <div className="text-center text-gray-400">
-                        <Package className="w-8 h-8 mx-auto mb-2" />
-                        <p className="text-xs">Image non disponible</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-32 w-full bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
-                    <div className="text-center text-gray-400">
-                      <Package className="w-8 h-8 mx-auto mb-2" />
-                      <p className="text-xs">Aucune image</p>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           ))}
