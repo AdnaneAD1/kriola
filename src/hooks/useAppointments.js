@@ -62,6 +62,7 @@ export function useAppointments(userId) {
       setIsLoading(true);
       setError(null);
       const constraints = [];
+      // Filtrer par userId seulement si fourni (sinon charge tout pour admin)
       if (userId) constraints.push(where('userId', '==', userId));
       constraints.push(orderBy('date', 'asc'));
       const q = query(collection(db, COLLECTION_NAME), ...constraints);
@@ -196,6 +197,7 @@ export function useAppointments(userId) {
     try {
       setIsLoading(true);
       const constraints = [];
+      // Filtrer par userId seulement si fourni (sinon charge tout pour admin)
       if (userId) constraints.push(where('userId', '==', userId));
       constraints.push(orderBy('date', 'asc'));
       const q = query(collection(db, COLLECTION_NAME), ...constraints);

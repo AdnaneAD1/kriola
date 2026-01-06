@@ -79,7 +79,7 @@ export function AppointmentForm({ isOpen, onClose, onSubmit, initialData }) {
           </h2>
         </div>
 
-        <div className="p-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <div className="p-6 overflow-y-auto flex-1">
           <form onSubmit={handleSubmit} id="appointmentForm" className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -126,15 +126,29 @@ export function useAdminDashboard() {
           }, {})
         ).map(([category, count]) => ({ category, count })),
         mostBooked: (() => {
-          const counts = appointments.reduce((acc, a) => {
-            const tId = a.treatmentId || a.treatment_id; // support legacy
-            const name = tId ? (treatmentById.get(tId)?.name || 'Traitement') : (a.treatment || a.title || 'Traitement');
-            acc[name] = (acc[name] || 0) + 1;
-            return acc;
-          }, {});
+          // Compter uniquement les rendez-vous confirmés ou complétés pour les traitements populaires
+          const validStatuses = ['confirmed', 'completed'];
+          const counts = appointments
+            .filter(a => validStatuses.includes((a.status || '').toLowerCase()))
+            .reduce((acc, a) => {
+              // Support pour plusieurs traitements par rendez-vous
+              if (Array.isArray(a.treatment_ids) && a.treatment_ids.length > 0) {
+                a.treatment_ids.forEach(tId => {
+                  const name = treatmentById.get(tId)?.name || 'Traitement';
+                  acc[name] = (acc[name] || 0) + 1;
+                });
+              } else {
+                // Support legacy: un seul traitement
+                const tId = a.treatmentId || a.treatment_id;
+                const name = tId ? (treatmentById.get(tId)?.name || 'Traitement') : (a.treatment || a.title || 'Traitement');
+                acc[name] = (acc[name] || 0) + 1;
+              }
+              return acc;
+            }, {});
+          
           return Object.entries(counts)
-            .sort((a,b) => b[1] - a[1])
-            .slice(0,5)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
             .map(([name, count]) => ({ name, count }));
         })(),
         revenueFromAppointments: appointments

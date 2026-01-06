@@ -77,7 +77,7 @@ export function ProductForm({ isOpen, onClose, product = null }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] flex flex-col relative shadow-2xl my-8">
         <div className="p-6 border-b">
           <button
@@ -91,7 +91,7 @@ export function ProductForm({ isOpen, onClose, product = null }) {
           </h2>
         </div>
 
-        <div className="p-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <div className="p-6 overflow-y-auto flex-1">
           <form onSubmit={handleSubmit} id="productForm" className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

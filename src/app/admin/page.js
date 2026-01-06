@@ -1,10 +1,11 @@
 'use client'
 
-import { Users, Calendar, TrendingUp, FileText, Package, Loader2 } from 'lucide-react';
+import { Users, Calendar, TrendingUp, FileText, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useAdminDashboard } from '@/hooks/useAdminDashboard';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { LoadingPage } from '@/components/ui/LoadingSpinner';
 
 export default function AdminDashboard() {
   const { stats, isLoading, error } = useAdminDashboard();
@@ -98,6 +99,21 @@ export default function AdminDashboard() {
     }
   };
 
+  if (isLoading) {
+    return <LoadingPage message="Chargement du tableau de bord..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="bg-red-50 text-red-600 p-6 rounded-lg max-w-md">
+          <p className="font-medium mb-2">Erreur de chargement</p>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -107,16 +123,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      ) : error ? (
-        <div className="bg-red-50 text-red-600 p-4 rounded-lg">
-          {error}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {dashboardStats.map((stat) => (
           <div key={stat.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-4">
@@ -134,7 +141,6 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
-      )}
 
       {/* Revenue Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -175,31 +181,41 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="divide-y divide-gray-100">
-            {recentAppointments.map((appointment) => (
-              <div key={appointment.id} className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0">
-                      <Calendar className="w-6 h-6 text-gray-400" />
+            {recentAppointments.length === 0 ? (
+              <div className="p-8 text-center">
+                <Calendar className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                <p className="text-gray-500 font-medium mb-1">Aucun rendez-vous aujourd'hui</p>
+                <p className="text-sm text-gray-400">
+                  Il n'y a pas de rendez-vous prévu pour aujourd'hui
+                </p>
+              </div>
+            ) : (
+              recentAppointments.map((appointment) => (
+                <div key={appointment.id} className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-shrink-0">
+                        <Calendar className="w-6 h-6 text-gray-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{appointment.client_name}</p>
+                        <p className="text-sm text-gray-500">
+                          {appointment.treatment}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{appointment.client_name}</p>
+                    <div className="flex items-center gap-4">
                       <p className="text-sm text-gray-500">
-                        {appointment.treatment}
+                        {formatAppointmentDate(appointment.date)} {appointment.time}
                       </p>
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
+                        {translateStatus(appointment.status)}
+                      </span>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <p className="text-sm text-gray-500">
-                      {formatAppointmentDate(appointment.date)} {appointment.time}
-                    </p>
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
-                      {translateStatus(appointment.status)}
-                    </span>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -214,28 +230,33 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="divide-y divide-gray-100">
-            {popularTreatments.map((treatment) => (
-              <div key={treatment.name} className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0">
-                      <Package className="w-6 h-6 text-gray-400" />
+            {popularTreatments.length === 0 ? (
+              <div className="p-8 text-center">
+                <Package className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                <p className="text-gray-500 font-medium mb-1">Aucun traitement populaire</p>
+                <p className="text-sm text-gray-400">
+                  Les traitements les plus réservés apparaîtront ici
+                </p>
+              </div>
+            ) : (
+              popularTreatments.map((treatment) => (
+                <div key={treatment.name} className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-shrink-0">
+                        <Package className="w-6 h-6 text-gray-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{treatment.name}</p>
+                        <p className="text-sm text-gray-500">
+                          {treatment.count} réservation{treatment.count > 1 ? 's' : ''}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{treatment.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {treatment.count} réservations
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500">
-                      {treatment.count} réservations ce mois
-                    </p>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
