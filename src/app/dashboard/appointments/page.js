@@ -386,8 +386,8 @@ export default function Appointments() {
                     <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColor(appointment.status)} whitespace-nowrap`}>
                       {translateStatus(appointment.status)}
                     </span>
-                    <div className="flex gap-2">
-                      {appointment.status !== 'confirmed' && (
+                    {appointment.status !== 'confirmed' && (
+                      <div className="flex gap-2">
                         <button
                           onClick={() => handleStatusUpdate(appointment.id, 'confirmed')}
                           disabled={updatingId === appointment.id}
@@ -396,28 +396,28 @@ export default function Appointments() {
                         >
                           <Check className="w-5 h-5" />
                         </button>
-                      )}
-                      {appointment.status !== 'pending' && (
-                        <button
-                          onClick={() => handleStatusUpdate(appointment.id, 'pending')}
-                          disabled={updatingId === appointment.id}
-                          className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
-                          title="Mettre en attente"
-                        >
-                          <Clock4 className="w-5 h-5" />
-                        </button>
-                      )}
-                      {appointment.status !== 'cancelled' && (
-                        <button
-                          onClick={() => handleStatusUpdate(appointment.id, 'cancelled')}
-                          disabled={updatingId === appointment.id}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Annuler"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      )}
-                    </div>
+                        {appointment.status !== 'pending' && (
+                          <button
+                            onClick={() => handleStatusUpdate(appointment.id, 'pending')}
+                            disabled={updatingId === appointment.id}
+                            className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+                            title="Mettre en attente"
+                          >
+                            <Clock4 className="w-5 h-5" />
+                          </button>
+                        )}
+                        {appointment.status !== 'cancelled' && (
+                          <button
+                            onClick={() => handleStatusUpdate(appointment.id, 'cancelled')}
+                            disabled={updatingId === appointment.id}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Annuler"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -21,6 +21,7 @@ export default function AppointmentBookingForm({ onClose, existingAppointments =
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
+  const minDate = format(new Date(), 'yyyy-MM-dd');
   
   // Récupération des traitements disponibles
   const { treatments = [], error: treatmentsError, loading, subscribeToTreatments } = useTreatments();
@@ -326,6 +327,12 @@ export default function AppointmentBookingForm({ onClose, existingAppointments =
   
   // Gestion du changement de date
   const handleDateChange = (date) => {
+    // Vérifier que la date n'est pas dans le passé
+    const today = format(new Date(), 'yyyy-MM-dd');
+    if (date < today) {
+      setError('Vous ne pouvez pas sélectionner une date passée');
+      return;
+    }
     setSelectedDate(date);
     setSelectedTime(''); // Réinitialiser l'heure sélectionnée
     loadAvailableTimeSlots(date);
